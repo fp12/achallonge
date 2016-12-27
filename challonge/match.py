@@ -2,6 +2,7 @@ import re
 
 from .helpers import FieldHolder, get_from_dict
 from .participant import Participant
+from .attachment import Attachment
 
 
 def verify_score_format(csv_score):
@@ -21,6 +22,11 @@ class Match(metaclass=FieldHolder):
 
     def __init__(self, connection, json_def):
         self.connection = connection
+
+        self.attachments = None
+        self._create_attachment = lambda a: self._create_holder(Attachment, a)
+        self._add_attachment = lambda a: self._add_holder(self.attachments, a)
+
         self._refresh_from_json(json_def)
 
     def _refresh_from_json(self, json_def):
@@ -47,3 +53,22 @@ class Match(metaclass=FieldHolder):
 
     async def report_tie(self, scores_csv: str):
         await self._report(scores_csv, 'tie')
+
+    async def _attach(self, url: str = None, description: str = None):
+        assert (url is not None or description is not None), 'url:{} - description:{}'.format(url, description)
+        params = {'description': description or ''}
+        if url is not None:
+            params.update({'url': url})
+        res = await self.connection('POST',
+                                    'tournaments/{}/matches/{}/attachments'.format(self._tournament_id, self._id),
+                                    'match_attachment',
+                                    **params)
+        new_a = self._create_attachment(res)
+        self._add_attachment(new_a)
+        return new_a
+
+    async def attach_url(self, url: str, description: str = None) -> Attachment:
+        return await self._attach(url, description)
+
+    async def attach_text(self, text: str = None) -> Attachment:
+        return await self._attach(description=text)

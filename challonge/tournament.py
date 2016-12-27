@@ -54,8 +54,15 @@ class Tournament(metaclass=FieldHolder):
 
     def __init__(self, connection, json_def):
         self.connection = connection
+
         self.participants = None
+        self._create_participant = lambda p: self._create_holder(Participant, p)
+        self._add_participant = lambda p: self._add_holder(self.participants, p)
+
         self.matches = None
+        self._create_match = lambda m: self._create_holder(Match, m)
+        self._add_match = lambda m: self._add_holder(self.matches, m)
+
         self._refresh_from_json(json_def)
 
     def _refresh_from_json(self, json_def):
@@ -91,14 +98,12 @@ class Tournament(metaclass=FieldHolder):
         res = await self.connection('POST', 'tournaments/{}/finalize'.format(self._id), **params)
         self._refresh_from_json(res)
 
-    def _create_participant(self, json_def):
-        return Participant(self.connection, json_def)
-
-    def _add_participant(self, p: Participant):
-        if p is not None:
-            if self.participants is None:
-                self.participants = []
-            self.participants.append(p)
+    async def allow_attachments(self, allow: bool = True):
+        res = await self.connection('PUT',
+                                    'tournaments/{}'.format(self._id),
+                                    'tournament',
+                                    accept_attachments=allow)
+        self._refresh_from_json(res)
 
     async def get_participant(self, p_id: str, force_update=False) -> Participant:
         found_p = find_local(self.participants, p_id)
@@ -163,21 +168,14 @@ class Tournament(metaclass=FieldHolder):
                               'tournaments/{}/participants/{}'.format(self._id, p._id))
         return await self.get_participants(force_update=True)
 
-    def _create_match(self, json_def):
-        return Match(self.connection, json_def)
-
-    def _add_match(self, p: Participant):
-        if p is not None:
-            if self.matches is None:
-                self.matches = []
-            self.matches.append(p)
-
     async def get_matches(self, force_update=False) -> list:
         if self._state != 'underway':
             print('tournament may not be started')
         if force_update or self.matches is None:
+            params = {'include_attachments': 1}
             res = await self.connection('GET',
-                                        'tournaments/{}/matches'.format(self._id))
+                                        'tournaments/{}/matches'.format(self._id),
+                                        **params)
             self.matches = [self._create_match(m) for m in res]
         if self.matches is not None:
             return self.matches

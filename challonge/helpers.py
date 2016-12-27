@@ -21,8 +21,19 @@ class FieldDescriptor:
 
 
 class FieldHolder(type):
+    def _create_holder(self, holder_class, json_def):
+        return holder_class(self.connection, json_def)
+
+    def _add_holder(self, local_list, x):
+        if x is not None:
+            if local_list is None:
+                local_list = []
+            local_list.append(x)
+
     def __init__(cls, name, bases, dct):
         super(FieldHolder, cls).__init__(name, bases, dct)
+        cls._create_holder = FieldHolder._create_holder
+        cls._add_holder = FieldHolder._add_holder
         if CHALLONGE_USE_FIELDS_DESCRIPTORS:
             for a in cls._fields:
                 name = '_{}'.format(a)
@@ -42,7 +53,7 @@ class Connection:
         self.session.close()
 
     async def __call__(self, method: str, uri: str, params_prefix: str =None, **params):
-        params = self.prepare_params(params, params_prefix)
+        params = self._prepare_params(params, params_prefix)
         # print(params)
 
         # build the HTTP request and use basic authentication
@@ -57,16 +68,22 @@ class Connection:
         return None
 
     @staticmethod
-    def prepare_params(params, prefix=None) -> dict:
+    def _prepare_params(params, prefix=None) -> dict:
+        def val(value):
+            if isinstance(value, bool):
+                # challonge only accepts lowercase true/false
+                value = str(value).lower()
+            return str(value)
+
         new_params = []
         if prefix:
             if prefix.endswith('[]'):
                 for k, v in params.items():
-                    new_params.extend([('{}[{}]'.format(prefix, k), str(u)) for u in v])
+                    new_params.extend([('{}[{}]'.format(prefix, k), val(u)) for u in v])
             else:
-                new_params = [('{}[{}]'.format(prefix, k), str(v)) for k, v in params.items()]
+                new_params = [('{}[{}]'.format(prefix, k), val(v)) for k, v in params.items()]
         else:
-            new_params = [(k, str(v)) for k, v in params.items()]
+            new_params = [(k, val(v)) for k, v in params.items()]
         return new_params
 
 

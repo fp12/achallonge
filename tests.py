@@ -37,6 +37,7 @@ class AAACleanup(unittest.TestCase):
                 yield from user.destroy_tournament(t)
 
 
+# @unittest.skip('')
 class UserTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
@@ -45,7 +46,7 @@ class UserTestCase(unittest.TestCase):
         self.assertNotEqual(new_user, None)
         yield from new_user.validate()  # can raise
 
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_b_get_tournaments(self):
         new_user = yield from get_user(username, api_key)
@@ -53,6 +54,7 @@ class UserTestCase(unittest.TestCase):
         self.assertIsInstance(t, list)
 
 
+# @unittest.skip('')
 class TournamentsTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
@@ -128,11 +130,13 @@ class TournamentsTestCase(unittest.TestCase):
         yield from self.user.destroy_tournament(t)
 
 
+# @unittest.skip('')
 class MatchesTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
         self.user = yield from get_user(username, api_key)
 
+    # @unittest.skip('')
     @async_test
     def test_a_report_live_scores(self):
         random_name = get_random_name()
@@ -150,6 +154,7 @@ class MatchesTestCase(unittest.TestCase):
         self.assertEqual(m[0].scores_csv, '1-0,0-1', random_name)
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
     @async_test
     def test_b_report_winner(self):
         random_name = get_random_name()
@@ -160,6 +165,43 @@ class MatchesTestCase(unittest.TestCase):
         yield from t.start()
         m = yield from t.get_matches()
         yield from m[0].report_winner(p1, '1-0')
+        self.assertEqual(m[0].winner_id, p1.id)
+        yield from self.user.destroy_tournament(t)
+
+
+# @unittest.skip('')
+class AttachmentsTestCase(unittest.TestCase):
+    @async_test
+    def setUp(self):
+        self.user = yield from get_user(username, api_key)
+
+    # @unittest.skip('')
+    @async_test
+    def test_a_url(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.allow_attachments()
+        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.start()
+        m = yield from t.get_matches()
+        a = yield from m[0].attach_url('https://github.com/fp12/achallonge')
+        self.assertEqual(a.url, 'https://github.com/fp12/achallonge')
+        a = yield from m[0].attach_url('https://github.com/fp12', description='main page')
+        self.assertEqual(a.description, 'main page')
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_b_text(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.allow_attachments()
+        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.start()
+        m = yield from t.get_matches()
+        random_text = get_random_name()
+        a = yield from m[0].attach_text(random_text)
+        self.assertEqual(a.description, random_text)
         yield from self.user.destroy_tournament(t)
 
 
