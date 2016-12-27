@@ -38,7 +38,7 @@ class AAACleanup(unittest.TestCase):
 
 
 class UserTestCase(unittest.TestCase):
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_a_init(self):
         new_user = User(username, api_key)
@@ -58,7 +58,7 @@ class TournamentsTestCase(unittest.TestCase):
     def setUp(self):
         self.user = yield from get_user(username, api_key)
 
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_a_create_destroy(self):
         random_name = get_random_name()
@@ -70,7 +70,7 @@ class TournamentsTestCase(unittest.TestCase):
         yield from self.user.destroy_tournament(t)
         self.assertEqual(len(self.user.tournaments), 0)
 
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_b_add_participants(self):
         random_name = get_random_name()
@@ -91,7 +91,7 @@ class TournamentsTestCase(unittest.TestCase):
             self.fail('participant not present')
         yield from self.user.destroy_tournament(t)
 
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_c_start_reset(self):
         random_name = get_random_name()
@@ -105,7 +105,7 @@ class TournamentsTestCase(unittest.TestCase):
         self.assertEqual(t.state, 'pending')
         yield from self.user.destroy_tournament(t)
 
-    @unittest.skip('')
+    # @unittest.skip('')
     @async_test
     def test_d_update_participants(self):
         random_name = get_random_name()
