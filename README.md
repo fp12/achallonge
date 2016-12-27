@@ -2,6 +2,8 @@
 *Async Challonge for Python 3.5+*
 
 [![Build Status](https://travis-ci.org/fp12/achallonge.svg?branch=master)](https://travis-ci.org/fp12/achallonge)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/cd2c13493bdf461695ada40356a9d3a1/badge.svg)](https://www.quantifiedcode.com/app/project/cd2c13493bdf461695ada40356a9d3a1)
+
 
 Modern library that is more than just a wrapper for the Challonge web API
 
@@ -38,6 +40,6 @@ async def pychallonge_async()
 		print(t.status) # open
 
     # Retrieve the participants for a given tournament.
-    participants = await tournaments[0].get_participant()
+    participants = await tournaments[0].get_participants()
     print(len(participants)) # 13
 ```
