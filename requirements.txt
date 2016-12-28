@@ -1,1 +1,3 @@
+cchardet
+aiodns
 aiohttp
