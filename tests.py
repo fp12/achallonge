@@ -121,6 +121,7 @@ class TournamentsTestCase(unittest.TestCase):
         self.assertEqual(p.seed, 2)
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
     @async_test
     def test_e_bulk(self):
         random_name = get_random_name()

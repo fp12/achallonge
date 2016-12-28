@@ -1,4 +1,3 @@
-import asyncio
 import json
 import aiohttp
 
@@ -43,14 +42,11 @@ class FieldHolder(type):
 class Connection:
     challonge_api_url = 'https://api.challonge.com/v1/{}.json'
 
-    def __init__(self, username: str, api_key: str, session, timeout):
+    def __init__(self, username: str, api_key: str, timeout, loop):
         self.username = username
         self.api_key = api_key
-        self.session = session
         self.timeout = timeout
-
-    def __del__(self):
-        self.session.close()
+        self.loop = loop
 
     async def __call__(self, method: str, uri: str, params_prefix: str =None, **params):
         params = self._prepare_params(params, params_prefix)
@@ -59,12 +55,14 @@ class Connection:
         # build the HTTP request and use basic authentication
         url = self.challonge_api_url.format(uri)
 
-        with aiohttp.Timeout(self.timeout):
-            async with self.session.request(method, url, params=params, auth=aiohttp.BasicAuth(login=self.username, password=self.api_key)) as response:
-                resp = await response.text()
-                if response.status >= 400:
-                    raise ChallongeException(uri, params, response.reason)
-                return json.loads(resp)
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            with aiohttp.Timeout(self.timeout):
+                auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
+                async with session.request(method, url, params=params, auth=auth) as response:
+                    resp = await response.text()
+                    if response.status >= 400:
+                        raise ChallongeException(uri, params, response.reason)
+                    return json.loads(resp)
         return None
 
     @staticmethod
@@ -87,10 +85,8 @@ class Connection:
         return new_params
 
 
-def get_connection(username, api_key, loop=None, timeout=DEFAULT_TIMEOUT):
-    loop = loop or asyncio.get_event_loop()
-    session = aiohttp.ClientSession(loop=loop)
-    return Connection(username, api_key, session, timeout)
+def get_connection(username, api_key, timeout=DEFAULT_TIMEOUT, loop=None):
+    return Connection(username, api_key, timeout, loop)
 
 
 def get_from_dict(s, data, *args):
