@@ -24,20 +24,20 @@ Getting Started
 
 Simple example::
 
-  import challonge
-  import asyncio
+    import challonge
+    import asyncio
 
-  my_username = 'challonge_username'
-  my_api_key = 'challonge_api_key'
+    my_username = 'challonge_username'
+    my_api_key = 'challonge_api_key'
 
-  async def main(loop):
+    async def main(loop):
     my_user = challonge.get_user(my_username, my_api_key)
     my_tournaments = await my_user.get_tournaments()
     for t in my_tournaments:
-      print(t.name)
+        print(t.name)
 
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main(loop))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(loop))
 
 
 
