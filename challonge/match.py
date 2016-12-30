@@ -11,6 +11,8 @@ def verify_score_format(csv_score):
 
 
 class Match(metaclass=FieldHolder):
+    """ representation of a Challonge match """
+
     _fields = ['attachment_count', 'created_at', 'group_id', 'has_attachment',
                'id', 'identifier', 'location', 'loser_id', 'player1_id',
                'player1_is_prereq_match_loser', 'player1_prereq_match_id',
@@ -46,12 +48,46 @@ class Match(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def report_live_scores(self, scores_csv: str):
+        """ report scores without giving a winner yet
+
+        |methcoro|
+
+        Args:
+            scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
+
+        Raises:
+            ChallongeException
+
+        """
         await self._report(scores_csv)
 
     async def report_winner(self, winner: Participant, scores_csv: str):
+        """ report scores and give a winner
+
+        |methcoro|
+
+        Args:
+            winner: :class:Participant instance
+            scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
+
+        Raises:
+            ChallongeException
+
+        """
         await self._report(scores_csv, winner._id)
 
     async def report_tie(self, scores_csv: str):
+        """ report tie if applicable (Round Robin and Swiss)
+
+        |methcoro|
+
+        Args:
+            scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
+
+        Raises:
+            ChallongeException
+
+        """
         await self._report(scores_csv, 'tie')
 
     async def _attach(self, url: str = None, description: str = None):
@@ -68,7 +104,36 @@ class Match(metaclass=FieldHolder):
         return new_a
 
     async def attach_url(self, url: str, description: str = None) -> Attachment:
+        """ add an url as an attachment
+
+        |methcoro|
+
+        Args:
+            url (str): str you want to add
+            description: *optional* description for your attachment
+
+        Returns:
+            Attachment:
+
+        Raises:
+            ChallongeException
+
+        """
         return await self._attach(url, description)
 
-    async def attach_text(self, text: str = None) -> Attachment:
+    async def attach_text(self, text: str) -> Attachment:
+        """ add a simple text as an attachment
+
+        |methcoro|
+
+        Args:
+            text: content you want to add
+
+        Returns:
+            Attachment: newly created instance
+
+        Raises:
+            ChallongeException
+
+        """
         return await self._attach(description=text)

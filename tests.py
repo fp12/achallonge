@@ -3,12 +3,31 @@ import asyncio
 import random
 import string
 import unittest
+import json
 
 from challonge import User, get_user
 
 
-username = None
-api_key = None
+def get_credentials():
+    username = None
+    api_key = None
+
+    secrets_file = '.secrets'
+    if os.path.isfile(secrets_file):
+        with open(secrets_file) as file:
+            local_secrets = json.load(file)
+            username = local_secrets['username']
+            api_key = local_secrets['api_key']
+
+    username = os.environ.get('CHALLONGE_USER') if username is None else username
+    api_key = os.environ.get('CHALLONGE_KEY') if api_key is None else api_key
+    if not username or not api_key:
+        raise RuntimeError('You must add CHALLONGE_USER and CHALLONGE_KEY to your environment variables to run the test suite')
+
+    return username, api_key
+
+
+username, api_key = get_credentials()
 
 
 def get_random_name():
@@ -207,9 +226,4 @@ class AttachmentsTestCase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    username = os.environ.get('CHALLONGE_USER') if username is None else username
-    api_key = os.environ.get('CHALLONGE_KEY') if api_key is None else api_key
-    if not username or not api_key:
-        raise RuntimeError('You must add CHALLONGE_USER and CHALLONGE_KEY to your environment variables to run the test suite')
-
     unittest.main()

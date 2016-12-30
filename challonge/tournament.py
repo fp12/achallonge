@@ -26,6 +26,8 @@ class TournamentStateResult(Enum):
 
 
 class Tournament(metaclass=FieldHolder):
+    """ representation of a Challonge tournament """
+
     _fields = ['accept_attachments', 'allow_participant_match_reporting',
                'anonymous_voting', 'category', 'check_in_duration',
                'completed_at', 'created_at', 'created_by_api',

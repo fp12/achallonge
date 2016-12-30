@@ -8,3 +8,7 @@ CHALLONGE_USE_FIELDS_DESCRIPTORS = True
 
 from .helpers import ChallongeException
 from .user import User, get_user
+from .tournament import Tournament
+from .participant import Participant
+from .match import Match
+from .attachment import Attachment

@@ -1,4 +1,3 @@
-import json
 import aiohttp
 
 from . import CHALLONGE_USE_FIELDS_DESCRIPTORS
@@ -8,6 +7,9 @@ DEFAULT_TIMEOUT = 30
 
 
 class ChallongeException(Exception):
+    """ If anything goes wrong during the request to the Challonge API,
+    this exception will be raised
+    """
     pass
 
 
@@ -59,10 +61,10 @@ class Connection:
             with aiohttp.Timeout(self.timeout):
                 auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
                 async with session.request(method, url, params=params, auth=auth) as response:
-                    resp = await response.text()
+                    resp = await response.json()
                     if response.status >= 400:
                         raise ChallongeException(uri, params, response.reason)
-                    return json.loads(resp)
+                    return resp
         return None
 
     @staticmethod
@@ -91,8 +93,6 @@ def get_connection(username, api_key, timeout=DEFAULT_TIMEOUT, loop=None):
 
 def get_from_dict(s, data, *args):
     for a in args:
-        # print('assign', arg, data[arg] if arg in data else None)
-        # setattr(a, '_{}'.format(arg), data[arg] if arg in data else None)
         name = '_{}'.format(a) if CHALLONGE_USE_FIELDS_DESCRIPTORS else a
         setattr(s, name, data[a] if a in data else None)
 

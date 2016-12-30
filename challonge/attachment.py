@@ -2,6 +2,8 @@ from .helpers import FieldHolder, get_from_dict
 
 
 class Attachment(metaclass=FieldHolder):
+    """ representation of a Challonge match attachment """
+
     _fields = ['id', 'match_id', 'user_id', 'description',
                'url', 'original_file_name', 'created_at',
                'updated_at', 'asset_file_name', 'asset_content_type',

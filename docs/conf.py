@@ -17,9 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- General configuration ------------------------------------------------
@@ -32,11 +32,18 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.viewcode']
+              'sphinx.ext.doctest',
+              'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+rst_prolog = """
+.. |methcoro| replace:: This method is a *coroutine* and needs to be awaited.
+.. |funccoro| replace:: This function is a *coroutine* and needs to be awaited.
+.. |from_api| replace:: *From Challonge API*:
+"""
+
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -154,6 +161,3 @@ texinfo_documents = [
      author, 'achallonge', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
