@@ -103,7 +103,7 @@ class TournamentsTestCase(unittest.TestCase):
         p1_1 = yield from t.get_participant(p1.id, force_update=True)
         self.assertEqual(p1.id, p1_1.id)
         ps = yield from t.get_participants(force_update=True)
-        remaining = yield from t.remove_participant(p2)
+        remaining = yield from t.remove_participant(p2, get_participants=True)
         self.assertEqual(len(remaining), 1)
         for p in ps:
             if p.id == p1.id:

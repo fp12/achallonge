@@ -1,4 +1,4 @@
-from .helpers import FieldHolder, get_from_dict
+from .helpers import FieldHolder
 
 
 class Participant(metaclass=FieldHolder):
@@ -19,7 +19,7 @@ class Participant(metaclass=FieldHolder):
 
     def _refresh_from_json(self, json_def):
         if 'participant' in json_def:
-            get_from_dict(self, json_def['participant'], *self._fields)
+            self._get_from_dict(json_def['participant'])
 
     async def _change(self, **params):
         return await self.connection('PUT',

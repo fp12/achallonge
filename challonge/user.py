@@ -1,5 +1,5 @@
 from . import CHALLONGE_AUTO_GET_PARTICIPANTS, CHALLONGE_AUTO_GET_MATCHES
-from .helpers import get_connection, find_local
+from .helpers import get_connection
 from .tournament import Tournament, TournamentType
 
 
@@ -22,6 +22,13 @@ class User:
 
     def _create_tournament(self, json_def) -> Tournament:
         return Tournament(self.connection, json_def)
+
+    def _find_tournament(self, e_id):
+        if self.tournaments is not None:
+            for e in self.tournaments:
+                if e.id == int(e_id):
+                    return e
+        return None
 
     async def validate(self):
         """ checks whether the current user is connected
@@ -50,7 +57,7 @@ class User:
             ChallongeException
 
         """
-        found_t = find_local(self.tournaments, t_id)
+        found_t = self._find_tournament(t_id)
         if force_update or found_t is None:
             res = await self.connection('GET', 'tournaments/{}'.format(t_id))
             found_t = self._create_tournament(res)
@@ -123,7 +130,7 @@ class User:
             ChallongeException
 
         """
-        found_t = find_local(self.tournaments, t.id)
+        found_t = self._find_tournament(t.id)
         if found_t is None:
             print('Unreferenced tournament')
         else:

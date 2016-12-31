@@ -1,4 +1,4 @@
-from .helpers import FieldHolder, get_from_dict
+from .helpers import FieldHolder
 
 
 class Attachment(metaclass=FieldHolder):
@@ -15,4 +15,4 @@ class Attachment(metaclass=FieldHolder):
 
     def _refresh_from_json(self, json_def):
         if 'match_attachment' in json_def:
-            get_from_dict(self, json_def['match_attachment'], *self._fields)
+            self._get_from_dict(json_def['match_attachment'])

@@ -1,6 +1,6 @@
 import re
 
-from .helpers import FieldHolder, get_from_dict
+from .helpers import FieldHolder
 from .participant import Participant
 from .attachment import Attachment
 
@@ -33,7 +33,7 @@ class Match(metaclass=FieldHolder):
 
     def _refresh_from_json(self, json_def):
         if 'match' in json_def:
-            get_from_dict(self, json_def['match'], *self._fields)
+            self._get_from_dict(json_def['match'])
 
     async def _report(self, scores_csv, winner=None):
         if not verify_score_format(scores_csv):

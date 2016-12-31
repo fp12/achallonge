@@ -1,7 +1,7 @@
 from enum import Enum
 
 from . import CHALLONGE_AUTO_GET_PARTICIPANTS, CHALLONGE_AUTO_GET_MATCHES
-from .helpers import FieldHolder, get_from_dict, find_local
+from .helpers import FieldHolder
 from .participant import Participant
 from .match import Match
 
@@ -70,7 +70,7 @@ class Tournament(metaclass=FieldHolder):
     def _refresh_from_json(self, json_def):
         if 'tournament' in json_def:
             t_data = json_def['tournament']
-            get_from_dict(self, t_data, *self._fields)
+            self._get_from_dict(t_data)
             if 'participants' in t_data:
                 self.participants = [self._create_participant(p) for p in t_data['participants']]
             if 'matches' in t_data:
@@ -167,7 +167,7 @@ class Tournament(metaclass=FieldHolder):
             ChallongeException
 
         """
-        found_p = find_local(self.participants, p_id)
+        found_p = self._find_holder(self.participants, p_id)
         if force_update or found_p is None:
             res = await self.connection('GET',
                                         'tournaments/{}/participants/{}'.format(self._id, p_id))

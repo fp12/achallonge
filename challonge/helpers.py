@@ -7,21 +7,22 @@ DEFAULT_TIMEOUT = 30
 
 
 class ChallongeException(Exception):
-    """ If anything goes wrong during the request to the Challonge API,
-    this exception will be raised
-    """
+    """ If anything goes wrong during the request to the Challonge API, this exception will be raised """
     pass
 
 
 class FieldDescriptor:
     def __init__(self, attr):
         self.attr = attr
+        self.__doc__ = 'readonly attribute'
 
     def __get__(self, instance, owner):
-        return getattr(instance, self.attr)
+        return getattr(instance, self.attr) if instance else self
 
 
 class FieldHolder(type):
+    private_name = '_{}'
+
     def _create_holder(self, holder_class, json_def):
         return holder_class(self.connection, json_def)
 
@@ -31,14 +32,29 @@ class FieldHolder(type):
                 local_list = []
             local_list.append(x)
 
+    def _find_holder(self, local_list, e_id):
+        if local_list is not None:
+            for e in local_list:
+                if e.id == int(e_id):
+                    return e
+        return None
+
+    def _get_from_dict(self, data):
+        for a in self._fields:
+            name = FieldHolder.private_name.format(a) if CHALLONGE_USE_FIELDS_DESCRIPTORS else a
+            setattr(self, name, data[a] if a in data else None)
+
     def __init__(cls, name, bases, dct):
         super(FieldHolder, cls).__init__(name, bases, dct)
+
         cls._create_holder = FieldHolder._create_holder
         cls._add_holder = FieldHolder._add_holder
+        cls._find_holder = FieldHolder._find_holder
+        cls._get_from_dict = FieldHolder._get_from_dict
+
         if CHALLONGE_USE_FIELDS_DESCRIPTORS:
             for a in cls._fields:
-                name = '_{}'.format(a)
-                setattr(cls, a, FieldDescriptor(name))
+                setattr(cls, a, FieldDescriptor(FieldHolder.private_name.format(a)))
 
 
 class Connection:
@@ -89,17 +105,3 @@ class Connection:
 
 def get_connection(username, api_key, timeout=DEFAULT_TIMEOUT, loop=None):
     return Connection(username, api_key, timeout, loop)
-
-
-def get_from_dict(s, data, *args):
-    for a in args:
-        name = '_{}'.format(a) if CHALLONGE_USE_FIELDS_DESCRIPTORS else a
-        setattr(s, name, data[a] if a in data else None)
-
-
-def find_local(local_list, e_id):
-    if local_list is not None:
-        for e in local_list:
-            if e.id == int(e_id):
-                return e
-    return None
