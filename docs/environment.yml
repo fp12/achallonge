@@ -1,4 +1,6 @@
 name: py35
 dependencies:
-- cchardet
-- sphinxcontrib-napoleon
+- python=3.5.2
+- pip:
+  - cchardet
+  - sphinxcontrib-napoleon
