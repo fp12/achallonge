@@ -77,6 +77,17 @@ class Tournament(metaclass=FieldHolder):
                 self.matches = [self._create_match(m) for m in t_data['matches']]
 
     async def start(self):
+        """ start the tournament on Challonge
+
+        |methcoro|
+
+        Note:
+            |from_api| Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants.
+
+        Raises:
+            ChallongeException
+
+        """
         params = {
                 'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
                 'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
@@ -85,6 +96,17 @@ class Tournament(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def reset(self):
+        """ reset the tournament on Challonge
+
+        |methcoro|
+
+        Note:
+            |from_api| Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again.
+
+        Raises:
+            ChallongeException
+
+        """
         params = {
                 'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
                 'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
@@ -93,6 +115,17 @@ class Tournament(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def finalize(self):
+        """ finalize the tournament on Challonge
+
+        |methcoro|
+
+        Note:
+            |from_api| Finalize a tournament that has had all match scores submitted, rendering its results permanent.
+
+        Raises:
+            ChallongeException
+
+        """
         params = {
                 'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
                 'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
@@ -101,13 +134,39 @@ class Tournament(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def allow_attachments(self, allow: bool = True):
+        """ allow this tournament to accept attachments or not
+
+        |methcoro|
+
+        Args:
+            allow (default=True): False to disallow
+
+        Raises:
+            ChallongeException
+
+        """
         res = await self.connection('PUT',
                                     'tournaments/{}'.format(self._id),
                                     'tournament',
                                     accept_attachments=allow)
         self._refresh_from_json(res)
 
-    async def get_participant(self, p_id: str, force_update=False) -> Participant:
+    async def get_participant(self, p_id: int, force_update=False) -> Participant:
+        """ get a participant by its id
+
+        |methcoro|
+
+        Args:
+            p_id: participant id
+            force_update (dfault=False): True to force an update to the Challonge API
+
+        Returns:
+            Participant: None if not found
+
+        Raises:
+            ChallongeException
+
+        """
         found_p = find_local(self.participants, p_id)
         if force_update or found_p is None:
             res = await self.connection('GET',
@@ -117,6 +176,20 @@ class Tournament(metaclass=FieldHolder):
         return found_p
 
     async def get_participants(self, force_update=False) -> list:
+        """ get all participants
+
+        |methcoro|
+
+        Args:
+            force_update (default=False): True to force an update to the Challonge API
+
+        Returns:
+            list[Participant]:
+
+        Raises:
+            ChallongeException
+
+        """
         if force_update or self.participants is None:
             res = await self.connection('GET',
                                         'tournaments/{}/participants'.format(self._id))
@@ -126,6 +199,21 @@ class Tournament(metaclass=FieldHolder):
         return []
 
     async def search_participant(self, name, force_update=False):
+        """ search a participant by (display) name
+
+        |methcoro|
+
+        Args:
+            name: display name of the participant
+            force_update (dfault=False): True to force an update to the Challonge API
+
+        Returns:
+            Participant: None if not found
+
+        Raises:
+            ChallongeException
+
+        """
         if force_update or self.participants is None:
             self.get_participants()
         if self.participants is not None:
@@ -135,6 +223,24 @@ class Tournament(metaclass=FieldHolder):
         return None
 
     async def add_participant(self, display_name: str = None, username: str = None, email: str = None, seed: int = 0, misc: str = None):
+        """ add a participant to the tournament
+
+        |methcoro|
+
+        Args:
+            display_name: The name displayed in the bracket/schedule - not required if email or challonge_username is provided. Must be unique per tournament.
+            username: Provide this if the participant has a Challonge account. He or she will be invited to the tournament.
+            email: Providing this will first search for a matching Challonge account. If one is found, this will have the same effect as the "challonge_username" attribute. If one is not found, the "new-user-email" attribute will be set, and the user will be invited via email to create an account.
+            seed: The participant's new seed. Must be between 1 and the current number of participants (including the new record). Overwriting an existing seed will automatically bump other participants as you would expect.
+            misc: Max: 255 characters. Multi-purpose field that is only visible via the API and handy for site integration (e.g. key to your users table)
+
+        Returns:
+            Participant: newly created participant
+
+        Raises:
+            ChallongeException
+
+        """
         assert((display_name is None) ^ (username is None))
         params = {
             'name': display_name or '',
@@ -165,14 +271,43 @@ class Tournament(metaclass=FieldHolder):
             return self.participants
         return []
 
-    async def remove_participant(self, p: Participant) -> list:
-        await self.connection('DELETE',
-                              'tournaments/{}/participants/{}'.format(self._id, p._id))
-        return await self.get_participants(force_update=True)
+    async def remove_participant(self, p: Participant, get_participants: bool = False) -> list:
+        """ remove a participant from the tournament
+
+        |methcoro|
+
+        Args:
+            p: the participant to remove
+            get_participants (default=False): True to return the updated participants list (additional API call)
+
+        Returns:
+            list[Participant]: None if get_participants is False
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.connection('DELETE', 'tournaments/{}/participants/{}'.format(self._id, p._id))
+        return await self.get_participants(force_update=True) if get_participants else None
 
     async def get_matches(self, force_update=False) -> list:
+        """ get all matches (once the tournament is started)
+
+        |methcoro|
+
+        Args:
+            force_update (default=False): True to force an update to the Challonge API
+
+        Returns:
+            list[Match]:
+
+        Raises:
+            ChallongeException
+
+        """
         if self._state != 'underway':
             print('tournament may not be started')
+
         if force_update or self.matches is None:
             params = {'include_attachments': 1}
             res = await self.connection('GET',
