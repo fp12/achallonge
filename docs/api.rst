@@ -1,4 +1,5 @@
 .. currentmodule:: challonge
+.. module:: challonge
 
 
 API

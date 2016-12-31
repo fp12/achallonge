@@ -46,12 +46,12 @@ Dependencies
 
 - *python 3.5+*
 - *aiohttp*
-  - *cchardet*
-  - *aiodns*
+    - *cchardet*
+    - *aiodns*
 
 
-Authors and License
--------------------
+Author and License
+------------------
 
 The ``achallonge`` package is written by Fabien Poupineau (fp12).
 

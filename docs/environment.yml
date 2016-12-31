@@ -1,0 +1,4 @@
+name: py35
+dependencies:
+- cchardet
+- sphinxcontrib-napoleon
