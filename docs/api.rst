@@ -20,6 +20,7 @@ Tournament
 
 .. autoclass:: challonge.Tournament
     :members:
+    :member-order: bysource
 
 
 Participant
@@ -27,6 +28,7 @@ Participant
 
 .. autoclass:: challonge.Participant
     :members:
+    :member-order: bysource
 
 
 Match
@@ -34,6 +36,7 @@ Match
 
 .. autoclass:: challonge.Match
     :members:
+    :member-order: bysource
 
 
 Attachment
@@ -41,6 +44,7 @@ Attachment
 
 .. autoclass:: challonge.Attachment
     :members:
+    :member-order: bysource
 
 
 Exception

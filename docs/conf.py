@@ -19,10 +19,16 @@
 #
 import os
 import sys
+
+
 sys.path.insert(0, os.path.abspath('..'))
 
 
 on_rtd = os.getenv('READTHEDOCS') == 'True'
+
+
+autodoc_member_order = 'bysource'
+
 
 # -- General configuration ------------------------------------------------
 
@@ -49,7 +55,6 @@ rst_prolog = """
 .. |funccoro| replace:: This function is a *coroutine* and needs to be awaited.
 .. |from_api| replace:: *From Challonge API*:
 """
-
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -80,8 +85,6 @@ release = '0.5.0'
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
 language = None
-
-autodoc_member_order = 'bysource'
 
 
 # List of patterns, relative to source directory, that match files and
