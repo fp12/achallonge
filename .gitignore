@@ -2,3 +2,4 @@ venv/
 *.pyc
 .secrets
 docs/_build
+.coverage
