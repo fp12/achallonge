@@ -199,6 +199,21 @@ class MatchesTestCase(unittest.TestCase):
         self.assertEqual(m[0].winner_id, p1.id)
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_c_votes(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
+        yield from t.start()
+        m = yield from t.get_matches()
+        yield from m[0].change_votes(player1_votes=3)
+        self.assertEqual(m[0].player1_votes, 3)
+        yield from m[0].change_votes(player1_votes=1, player2_votes=5, add=True)
+        self.assertEqual(m[0].player1_votes, 4)
+        self.assertEqual(m[0].player2_votes, 5)
+        yield from self.user.destroy_tournament(t)
+
 
 # @unittest.skip('')
 class AttachmentsTestCase(unittest.TestCase):
