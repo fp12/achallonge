@@ -13,7 +13,7 @@ class Participant(metaclass=FieldHolder):
                'email_hash', 'username', 'attached_participatable_portrait_url',
                'can_check_in', 'checked_in', 'reactivatable']
 
-    def __init__(self, connection, json_def):
+    def __init__(self, connection, json_def, **kwargs):
         self.connection = connection
         self._refresh_from_json(json_def)
 

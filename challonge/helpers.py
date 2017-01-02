@@ -23,14 +23,8 @@ class FieldDescriptor:
 class FieldHolder(type):
     private_name = '_{}'
 
-    def _create_holder(self, holder_class, json_def):
-        return holder_class(self.connection, json_def)
-
-    def _add_holder(self, local_list, x):
-        if x is not None:
-            if local_list is None:
-                local_list = []
-            local_list.append(x)
+    def _create_holder(self, holder_class, json_def, **kwargs):
+        return holder_class(self.connection, json_def, **kwargs)
 
     def _find_holder(self, local_list, e_id):
         if local_list is not None:
@@ -48,7 +42,6 @@ class FieldHolder(type):
         super(FieldHolder, cls).__init__(name, bases, dct)
 
         cls._create_holder = FieldHolder._create_holder
-        cls._add_holder = FieldHolder._add_holder
         cls._find_holder = FieldHolder._find_holder
         cls._get_from_dict = FieldHolder._get_from_dict
 

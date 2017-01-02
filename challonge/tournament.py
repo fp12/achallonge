@@ -54,16 +54,15 @@ class Tournament(metaclass=FieldHolder):
                'game_name', 'participants_swappable',
                'team_convertable', 'group_stages_were_started']
 
-    def __init__(self, connection, json_def):
+    def __init__(self, connection, json_def, **kwargs):
         self.connection = connection
 
         self.participants = None
         self._create_participant = lambda p: self._create_holder(Participant, p)
-        self._add_participant = lambda p: self._add_holder(self.participants, p)
+        self._find_participant = lambda p_id: self._find_holder(self.participants, p_id)
 
         self.matches = None
         self._create_match = lambda m: self._create_holder(Match, m)
-        self._add_match = lambda m: self._add_holder(self.matches, m)
 
         self._refresh_from_json(json_def)
 
@@ -75,6 +74,13 @@ class Tournament(metaclass=FieldHolder):
                 self.participants = [self._create_participant(p) for p in t_data['participants']]
             if 'matches' in t_data:
                 self.matches = [self._create_match(m) for m in t_data['matches']]
+
+    def _add_participant(self, p: Participant):
+        if p is not None:
+            if self.participants is None:
+                self.participants = [p]
+            else:
+                self.participants.append(p)
 
     async def start(self):
         """ start the tournament on Challonge
@@ -167,10 +173,11 @@ class Tournament(metaclass=FieldHolder):
             ChallongeException
 
         """
-        found_p = self._find_holder(self.participants, p_id)
+        found_p = self._find_participant(p_id)
         if force_update or found_p is None:
-            res = await self.connection('GET',
-                                        'tournaments/{}/participants/{}'.format(self._id, p_id))
+            res = await self.connection('GET', 'tournaments/{}/participants/{}'.format(self._id, p_id))
+            if found_p:
+                self.participants.remove(found_p)
             found_p = self._create_participant(res)
             self._add_participant(found_p)
         return found_p
@@ -260,6 +267,7 @@ class Tournament(metaclass=FieldHolder):
         self._add_participant(new_p)
         return new_p
 
+    # not documented because may need to be improved
     async def add_participants(self, *names: str) -> list:
         params = {'name': list(names)}
         res = await self.connection('POST',
@@ -288,7 +296,13 @@ class Tournament(metaclass=FieldHolder):
 
         """
         await self.connection('DELETE', 'tournaments/{}/participants/{}'.format(self._id, p._id))
-        return await self.get_participants(force_update=True) if get_participants else None
+        if get_participants:
+            return await self.get_participants(force_update=True)
+        elif p in self.participants:
+            self.participants.remove(p)
+        else:
+            # TODO: error management
+            pass
 
     async def get_matches(self, force_update=False) -> list:
         """ get all matches (once the tournament is started)

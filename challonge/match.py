@@ -22,18 +22,24 @@ class Match(metaclass=FieldHolder):
                'state', 'tournament_id', 'underway_at', 'updated_at',
                'winner_id', 'prerequisite_match_ids_csv', 'scores_csv']
 
-    def __init__(self, connection, json_def):
+    def __init__(self, connection, json_def, **kwargs):
         self.connection = connection
 
         self.attachments = None
-        self._create_attachment = lambda a: self._create_holder(Attachment, a)
-        self._add_attachment = lambda a: self._add_holder(self.attachments, a)
+        self._create_attachment = lambda a, **kwargs: self._create_holder(Attachment, a, **kwargs)
 
         self._refresh_from_json(json_def)
 
     def _refresh_from_json(self, json_def):
         if 'match' in json_def:
             self._get_from_dict(json_def['match'])
+
+    def _add_attachment(self, a: Attachment):
+        if a is not None:
+            if self.attachments is None:
+                self.attachments = [a]
+            else:
+                self.attachments.append(a)
 
     async def _report(self, scores_csv, winner=None):
         if not verify_score_format(scores_csv):
@@ -99,7 +105,7 @@ class Match(metaclass=FieldHolder):
                                     'tournaments/{}/matches/{}/attachments'.format(self._tournament_id, self._id),
                                     'match_attachment',
                                     **params)
-        new_a = self._create_attachment(res)
+        new_a = self._create_attachment(res, tournament_id=self._tournament_id)
         self._add_attachment(new_a)
         return new_a
 
@@ -109,7 +115,7 @@ class Match(metaclass=FieldHolder):
         |methcoro|
 
         Args:
-            url (str): str you want to add
+            url: url you want to add
             description: *optional* description for your attachment
 
         Returns:
@@ -127,7 +133,7 @@ class Match(metaclass=FieldHolder):
         |methcoro|
 
         Args:
-            text: content you want to add
+            text: content you want to add (description)
 
         Returns:
             Attachment: newly created instance
@@ -137,3 +143,22 @@ class Match(metaclass=FieldHolder):
 
         """
         return await self._attach(description=text)
+
+    async def destroy_attachment(self, a: Attachment):
+        """ destroy a match attachment
+
+        |methcoro|
+
+        Args:
+            a: the attachment your want to destroy
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.connection('DELETE', 'tournaments/{}/matches/{}/attachments/{}'.format(self._tournament_id, self._id, a._id))
+        if a in self.attachments:
+            self.attachments.remove(a)
+        else:
+            # TODO: error management
+            pass

@@ -57,7 +57,7 @@ class AAACleanup(unittest.TestCase):
 
 
 # @unittest.skip('')
-class UserTestCase(unittest.TestCase):
+class AAUserTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
     def test_a_init(self):
@@ -74,7 +74,7 @@ class UserTestCase(unittest.TestCase):
 
 
 # @unittest.skip('')
-class TournamentsTestCase(unittest.TestCase):
+class ATournamentsTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
         self.user = yield from get_user(username, api_key)
@@ -96,20 +96,31 @@ class TournamentsTestCase(unittest.TestCase):
     def test_b_add_participants(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
+
         p1 = yield from t.add_participant('p1')
         self.assertEqual(p1.name, 'p1')
+        self.assertEqual(len(t.participants), 1)
+
         p2 = yield from t.add_participant('p2')
         self.assertNotEqual(p1.id, p2.id)
+        self.assertEqual(len(t.participants), 2)
+
         p1_1 = yield from t.get_participant(p1.id, force_update=True)
         self.assertEqual(p1.id, p1_1.id)
+        self.assertEqual(len(t.participants), 2)
+
         ps = yield from t.get_participants(force_update=True)
+        self.assertEqual(len(t.participants), 2)
+
         remaining = yield from t.remove_participant(p2, get_participants=True)
         self.assertEqual(len(remaining), 1)
+
         for p in ps:
             if p.id == p1.id:
                 break
         else:
             self.fail('participant not present')
+
         yield from self.user.destroy_tournament(t)
 
     # @unittest.skip('')
@@ -204,10 +215,21 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
         m = yield from t.get_matches()
-        a = yield from m[0].attach_url('https://github.com/fp12/achallonge')
-        self.assertEqual(a.url, 'https://github.com/fp12/achallonge')
-        a = yield from m[0].attach_url('https://github.com/fp12', description='main page')
-        self.assertEqual(a.description, 'main page')
+
+        a1 = yield from m[0].attach_url('https://github.com/fp12/achallonge')
+        self.assertEqual(a1.url, 'https://github.com/fp12/achallonge')
+        self.assertEqual(len(m[0].attachments), 1)
+
+        a2 = yield from m[0].attach_url('https://github.com/fp12', description='main page')
+        self.assertEqual(a2.description, 'main page')
+        self.assertEqual(len(m[0].attachments), 2)
+
+        yield from a2.change_url('https://github.com/fp12', description='GitHub portal')
+        self.assertEqual(a2.description, 'GitHub portal')
+
+        yield from m[0].destroy_attachment(a2)
+        self.assertEqual(len(m[0].attachments), 1)
+
         yield from self.user.destroy_tournament(t)
 
     # @unittest.skip('')
@@ -219,9 +241,18 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
         m = yield from t.get_matches()
+
         random_text = get_random_name()
         a = yield from m[0].attach_text(random_text)
         self.assertEqual(a.description, random_text)
+
+        random_text = get_random_name()
+        yield from a.change_text(random_text)
+        self.assertEqual(a.description, random_text)
+
+        yield from m[0].destroy_attachment(a)
+        self.assertEqual(len(m[0].attachments), 0)
+
         yield from self.user.destroy_tournament(t)
 
 

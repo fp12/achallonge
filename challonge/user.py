@@ -17,8 +17,9 @@ class User:
     def _add_tournament(self, t: Tournament):
         if t is not None:
             if self.tournaments is None:
-                self.tournaments = []
-            self.tournaments.append(t)
+                self.tournaments = [t]
+            else:
+                self.tournaments.append(t)
 
     def _create_tournament(self, json_def) -> Tournament:
         return Tournament(self.connection, json_def)
@@ -130,12 +131,12 @@ class User:
             ChallongeException
 
         """
-        found_t = self._find_tournament(t.id)
-        if found_t is None:
-            print('Unreferenced tournament')
-        else:
-            self.tournaments.remove(found_t)
         await self.connection('DELETE', 'tournaments/{}'.format(t.id))
+        if t in self.tournaments:
+            self.tournaments.remove(t)
+        else:
+            # TODO: error management
+            pass
 
 
 async def get_user(username: str, api_key: str, **kwargs) -> User:
