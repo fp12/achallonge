@@ -100,18 +100,14 @@ class Participant(metaclass=FieldHolder):
         return None
 
     async def check_in(self):
-        res = await self.connection('POST',
-                                    'tournaments/{}/participants/{}/check_in'.format(self._tournament_id, self._id),
-                                    'participant')
+        res = await self.connection('POST', 'tournaments/{}/participants/{}/check_in'.format(self._tournament_id, self._id))
         if 'participant' in res and 'checked_in_at' in res['participant']:
             self._checked_in_at = res['participant']['checked_in_at']
             return self._checked_in_at
         return None
 
     async def undo_check_in(self):
-        res = await self.connection('POST',
-                                    'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id),
-                                    'participant')
+        res = await self.connection('POST', 'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id))
         if 'participant' in res and 'checked_in_at' in res['participant']:
             self._checked_in_at = res['participant']['checked_in_at']
             return self._checked_in_at

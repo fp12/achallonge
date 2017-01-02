@@ -4,6 +4,7 @@ import random
 import string
 import unittest
 import json
+from datetime import datetime, timedelta
 
 from challonge import User, get_user
 
@@ -146,9 +147,22 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.add_participant('p2')
         yield from t.add_participant('p3')
         yield from t.add_participant('p4')
+
         self.assertEqual(p.seed, 1)
         yield from p.change_seed(2)
         self.assertEqual(p.seed, 2)
+
+        new_name = 'player 1'
+        returned_name = yield from p.change_display_name(new_name)
+        self.assertEqual(new_name, returned_name)
+        self.assertEqual(new_name, p.name)
+
+        self.assertEqual(p.misc, None)
+        new_misc = 'some interesting text'
+        returned_misc = yield from p.change_misc(new_misc)
+        self.assertEqual(new_misc, returned_misc)
+        self.assertEqual(new_misc, p.misc)
+
         yield from self.user.destroy_tournament(t)
 
     # @unittest.skip('')
@@ -159,6 +173,27 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         self.assertEqual(len(t.participants), 4)
         yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_f_checkin(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+
+        new_start_date = datetime.now() + timedelta(minutes=5)
+        yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
+                                    new_start_date.strftime('%H:%M'),
+                                    10)
+        self.assertNotEqual(t.start_at, None)
+        self.assertNotEqual(t.check_in_duration, None)
+
+        p = yield from t.add_participant('p1')
+
+        yield from p.check_in()
+        self.assertNotEqual(p.checked_in_at, None)
+
+        yield from p.undo_check_in()
+        self.assertEqual(p.checked_in_at, None)
 
 
 # @unittest.skip('')
