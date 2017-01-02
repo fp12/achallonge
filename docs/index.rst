@@ -8,7 +8,8 @@ achallonge
 
 async challonge for python 3.5+!
 
-.. _github: https://github.com/fp12/achallonge
+.. _GitHub: https://github.com/fp12/achallonge
+.. highlight:: python
 
 
 Features
@@ -44,10 +45,10 @@ Simple example::
 Dependencies
 ------------
 
-- *python 3.5+*
-- *aiohttp*
-    - *cchardet*
-    - *aiodns*
+- python 3.5+
+- aiohttp
+    - cchardet
+    - aiodns
 
 
 Author and License
@@ -57,7 +58,7 @@ The ``achallonge`` package is written by Fabien Poupineau (fp12).
 
 It's covered under the *MIT* license.
 
-Feel free to improve this package and send a pull request to github_.
+Feel free to improve this package and send a pull request to GitHub_.
 
 
 
@@ -66,6 +67,7 @@ Feel free to improve this package and send a pull request to github_.
    :caption: Contents:
    
    api
+   examples
 
 
 

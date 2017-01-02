@@ -260,8 +260,8 @@ class Tournament(metaclass=FieldHolder):
         self._add_participant(new_p)
         return new_p
 
-    async def add_participants(self, names: list) -> list:
-        params = {'name': names}
+    async def add_participants(self, *names: str) -> list:
+        params = {'name': list(names)}
         res = await self.connection('POST',
                                     'tournaments/{}/participants/bulk_add'.format(self._id),
                                     'participants[]',

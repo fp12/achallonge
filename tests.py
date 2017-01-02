@@ -145,7 +145,7 @@ class TournamentsTestCase(unittest.TestCase):
     def test_e_bulk(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
-        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         self.assertEqual(len(t.participants), 4)
         yield from self.user.destroy_tournament(t)
 
@@ -161,7 +161,7 @@ class MatchesTestCase(unittest.TestCase):
     def test_a_report_live_scores(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
-        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
         self.assertEqual(t.state, 'underway', random_name)
         m = yield from t.get_matches()
@@ -179,7 +179,7 @@ class MatchesTestCase(unittest.TestCase):
     def test_b_report_winner(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
-        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         p1 = yield from t.search_participant('p1')
         self.assertEqual(p1.name, 'p1')
         yield from t.start()
@@ -201,7 +201,7 @@ class AttachmentsTestCase(unittest.TestCase):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
         yield from t.allow_attachments()
-        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
         m = yield from t.get_matches()
         a = yield from m[0].attach_url('https://github.com/fp12/achallonge')
@@ -216,7 +216,7 @@ class AttachmentsTestCase(unittest.TestCase):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
         yield from t.allow_attachments()
-        yield from t.add_participants(['p1', 'p2', 'p3', 'p4'])
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
         m = yield from t.get_matches()
         random_text = get_random_name()
