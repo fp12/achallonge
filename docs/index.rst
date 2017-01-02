@@ -9,7 +9,6 @@ achallonge
 async challonge for python 3.5+!
 
 .. _GitHub: https://github.com/fp12/achallonge
-.. highlight:: python
 
 
 Features
@@ -25,21 +24,7 @@ Getting Started
 
 Simple example::
 
-    import challonge
-    import asyncio
-
-    my_username = 'challonge_username'
-    my_api_key = 'challonge_api_key'
-
-    async def main(loop):
-    my_user = challonge.get_user(my_username, my_api_key)
-    my_tournaments = await my_user.get_tournaments()
-    for t in my_tournaments:
-        print(t.name)
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
-
+.. literalinclude:: ../examples/listing.py
 
 
 Dependencies
