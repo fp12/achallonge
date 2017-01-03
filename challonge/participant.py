@@ -22,13 +22,14 @@ class Participant(metaclass=FieldHolder):
             self._get_from_dict(json_def['participant'])
 
     async def _change(self, **params):
-        return await self.connection('PUT',
-                                     'tournaments/{}/participants/{}'.format(self._tournament_id, self._id),
-                                     'participant',
-                                     **params)
+        res = await self.connection('PUT',
+                                    'tournaments/{}/participants/{}'.format(self._tournament_id, self._id),
+                                    'participant',
+                                    **params)
+        self._refresh_from_json(res)
 
-    async def change_display_name(self, new_name: str) -> str:
-        """
+    async def change_display_name(self, new_name: str):
+        """ Change the name displayed on the Challonge website
 
         |methcoro|
 
@@ -38,18 +39,43 @@ class Participant(metaclass=FieldHolder):
         Args:
             new_name: as described
 
-        Returns:
-            the same name as passed or `None` if something failed
+        Raises:
+            ChallongeException
+
+        """
+        await self._change(name=new_name)
+
+    async def change_username(self, username: str):
+        """ will invite the Challonge user to the tournament
+
+        |methcoro|
+
+        Args:
+            username: Challonge username
 
         Raises:
             ChallongeException
 
         """
-        res = await self._change(name=new_name)
-        if 'participant' in res and 'name' in res['participant']:
-            self._name = res['participant']['name']
-            return self._name
-        return None
+        await self._change(challonge_username=username)
+
+    async def change_email(self, email: str):
+        """  set / update the email associated to the participant
+
+        |methcoro|
+
+        Setting an email will first search for a matching Challonge account.
+        If one is found, it will be invited to the tournament.
+        If one is not found, the "new-user-email" attribute will be set, and the user will be invited via email to create an account.
+
+        Args:
+            email: as described
+
+        Raises:
+            ChallongeException
+
+        """
+        await self._change(email=email)
 
     async def change_seed(self, new_seed: int) -> int:
         """
@@ -69,11 +95,7 @@ class Participant(metaclass=FieldHolder):
             ChallongeException
 
         """
-        res = await self._change(seed=new_seed)
-        if 'participant' in res and 'seed' in res['participant']:
-            self._seed = res['participant']['seed']
-            return self._seed
-        return None
+        await self._change(seed=new_seed)
 
     async def change_misc(self, misc: str) -> str:
         """
@@ -86,18 +108,11 @@ class Participant(metaclass=FieldHolder):
         Args:
             misc: str content
 
-        Returns:
-            the same seed number as passed or `None` if something failed
-
         Raises:
             ChallongeException
 
         """
-        res = await self._change(misc=misc)
-        if 'participant' in res and 'misc' in res['participant']:
-            self._misc = res['participant']['misc']
-            return self._misc
-        return None
+        await self._change(misc=misc)
 
     async def check_in(self):
         res = await self.connection('POST', 'tournaments/{}/participants/{}/check_in'.format(self._tournament_id, self._id))
