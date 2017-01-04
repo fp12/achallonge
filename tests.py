@@ -241,6 +241,35 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_g_multi_tournaments(self):
+        random_name1 = get_random_name()
+        t1 = yield from self.user.create_tournament(random_name1, random_name1)
+        random_name2 = get_random_name()
+        t2 = yield from self.user.create_tournament(random_name2, random_name2)
+
+        t1_ref = yield from self.user.get_tournament(t1.id)
+        self.assertEqual(t1, t1_ref)
+        self.assertTrue(t1 is t1_ref)
+        self.assertNotEqual(t1, t2)
+
+        yield from self.user.destroy_tournament(t1)
+        yield from self.user.destroy_tournament(t2)
+
+    # @unittest.skip('')
+    @async_test
+    def test_h_participants_constistency(self):
+        random_name1 = get_random_name()
+        t = yield from self.user.create_tournament(random_name1, random_name1)
+        p1 = yield from t.add_participant('p1')
+        yield from t.add_participants('p2', 'p3', 'p4')
+        yield from t.start()  # should order a refresh of participants
+
+        self.assertTrue(p1 in t.participants)
+
+        yield from self.user.destroy_tournament(t)
+
 
 # @unittest.skip('')
 class MatchesTestCase(unittest.TestCase):

@@ -44,6 +44,7 @@ class FieldHolder(type):
         cls._create_holder = FieldHolder._create_holder
         cls._find_holder = FieldHolder._find_holder
         cls._get_from_dict = FieldHolder._get_from_dict
+        cls.__eq__ = lambda self, other: self._id == other._id
 
         if CHALLONGE_USE_FIELDS_DESCRIPTORS:
             for a in cls._fields:

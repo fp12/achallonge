@@ -71,10 +71,30 @@ class Tournament(metaclass=FieldHolder):
         if 'tournament' in json_def:
             t_data = json_def['tournament']
             self._get_from_dict(t_data)
+
             if 'participants' in t_data:
-                self.participants = [self._create_participant(p) for p in t_data['participants']]
+                if self.participants is None:
+                    self.participants = [self._create_participant(p) for p in t_data['participants']]
+                else:
+                    for p_data in t_data['participants']:
+                        for p in self.participants:
+                            if p_data['participant']['id'] == p._id:
+                                p._refresh_from_json(p_data)
+                                break
+                        else:
+                            self.participants.append(self._create_participant(p_data))
+
             if 'matches' in t_data:
-                self.matches = [self._create_match(m) for m in t_data['matches']]
+                if self.matches is None:
+                    self.matches = [self._create_match(m) for m in t_data['matches']]
+                else:
+                    for m_data in t_data['matches']:
+                        for m in self.matches:
+                            if m_data['match']['id'] == m._id:
+                                m._refresh_from_json(m_data)
+                                break
+                        else:
+                            self.matches.append(self._create_match(m_data))
 
     def _add_participant(self, p: Participant):
         if p is not None:
@@ -199,10 +219,7 @@ class Tournament(metaclass=FieldHolder):
         found_p = self._find_participant(p_id)
         if force_update or found_p is None:
             res = await self.connection('GET', 'tournaments/{}/participants/{}'.format(self._id, p_id))
-            if found_p:
-                self.participants.remove(found_p)
-            found_p = self._create_participant(res)
-            self._add_participant(found_p)
+            found_p._refresh_from_json(res)
         return found_p
 
     async def get_participants(self, force_update=False) -> list:

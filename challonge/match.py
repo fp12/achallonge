@@ -32,7 +32,20 @@ class Match(metaclass=FieldHolder):
 
     def _refresh_from_json(self, json_def):
         if 'match' in json_def:
-            self._get_from_dict(json_def['match'])
+            m_data = json_def['match']
+            self._get_from_dict(m_data)
+
+            if 'attachments' in m_data:
+                if self.attachments is None:
+                    self.attachments = [self._create_attachment(a) for a in m_data['attachments']]
+                else:
+                    for a_data in m_data['attachments']:
+                        for a in self.attachments:
+                            if a_data['attachment']['id'] == a._id:
+                                a._refresh_from_json(a_data)
+                                break
+                        else:
+                            self.attachments.append(self._create_attachment(a_data))
 
     def _add_attachment(self, a: Attachment):
         if a is not None:
