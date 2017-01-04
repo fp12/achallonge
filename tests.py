@@ -115,14 +115,17 @@ class ATournamentsTestCase(unittest.TestCase):
         ps = yield from t.get_participants(force_update=True)
         self.assertEqual(len(t.participants), 2)
 
-        remaining = yield from t.remove_participant(p2, get_participants=True)
-        self.assertEqual(len(remaining), 1)
+        yield from t.remove_participant(p2)
+        self.assertEqual(len(t.participants), 1)
 
         for p in ps:
             if p.id == p1.id:
                 break
         else:
             self.fail('participant not present')
+
+        yield from t.add_participants('p3', 'p4')
+        self.assertEqual(len(t.participants), 3)
 
         yield from self.user.destroy_tournament(t)
 

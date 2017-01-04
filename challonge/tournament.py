@@ -73,28 +73,33 @@ class Tournament(metaclass=FieldHolder):
             self._get_from_dict(t_data)
 
             if 'participants' in t_data:
-                if self.participants is None:
-                    self.participants = [self._create_participant(p) for p in t_data['participants']]
-                else:
-                    for p_data in t_data['participants']:
-                        for p in self.participants:
-                            if p_data['participant']['id'] == p._id:
-                                p._refresh_from_json(p_data)
-                                break
-                        else:
-                            self.participants.append(self._create_participant(p_data))
-
+                self._refresh_participants_from_json(t_data['participants'])
             if 'matches' in t_data:
-                if self.matches is None:
-                    self.matches = [self._create_match(m) for m in t_data['matches']]
+                self._refresh_matches_from_json(t_data['matches'])
+
+    def _refresh_participants_from_json(self, participants_data):
+        if self.participants is None:
+            self.participants = [self._create_participant(p_data) for p_data in participants_data]
+        else:
+            for p_data in participants_data:
+                for p in self.participants:
+                    if p_data['participant']['id'] == p._id:
+                        p._refresh_from_json(p_data)
+                        break
                 else:
-                    for m_data in t_data['matches']:
-                        for m in self.matches:
-                            if m_data['match']['id'] == m._id:
-                                m._refresh_from_json(m_data)
-                                break
-                        else:
-                            self.matches.append(self._create_match(m_data))
+                    self.participants.append(self._create_participant(p_data))
+
+    def _refresh_matches_from_json(self, matches_data):
+        if self.matches is None:
+            self.matches = [self._create_match(m_data) for m_data in matches_data]
+        else:
+            for m_data in matches_data:
+                for m in self.matches:
+                    if m_data['match']['id'] == m._id:
+                        m._refresh_from_json(m_data)
+                        break
+                else:
+                    self.matches.append(self._create_match(m_data))
 
     def _add_participant(self, p: Participant):
         if p is not None:
@@ -240,10 +245,8 @@ class Tournament(metaclass=FieldHolder):
         if force_update or self.participants is None:
             res = await self.connection('GET',
                                         'tournaments/{}/participants'.format(self._id))
-            self.participants = [self._create_participant(p) for p in res]
-        if self.participants is not None:
-            return self.participants
-        return []
+            self._refresh_participants_from_json(res)
+        return self.participants or []
 
     async def search_participant(self, name, force_update=False):
         """ search a participant by (display) name
@@ -314,31 +317,23 @@ class Tournament(metaclass=FieldHolder):
                                     'tournaments/{}/participants/bulk_add'.format(self._id),
                                     'participants[]',
                                     **params)
-        self.participants = [self._create_participant(p) for p in res]
-        if self.participants is not None:
-            return self.participants
-        return []
+        self._refresh_participants_from_json(res)
+        return self.participants
 
-    async def remove_participant(self, p: Participant, get_participants: bool = False) -> list:
+    async def remove_participant(self, p: Participant):
         """ remove a participant from the tournament
 
         |methcoro|
 
         Args:
             p: the participant to remove
-            get_participants (default=False): True to return the updated participants list (additional API call)
-
-        Returns:
-            list[Participant]: None if get_participants is False
 
         Raises:
             ChallongeException
 
         """
         await self.connection('DELETE', 'tournaments/{}/participants/{}'.format(self._id, p._id))
-        if get_participants:
-            return await self.get_participants(force_update=True)
-        elif p in self.participants:
+        if p in self.participants:
             self.participants.remove(p)
         else:
             # TODO: error management
@@ -367,10 +362,8 @@ class Tournament(metaclass=FieldHolder):
             res = await self.connection('GET',
                                         'tournaments/{}/matches'.format(self._id),
                                         **params)
-            self.matches = [self._create_match(m) for m in res]
-        if self.matches is not None:
-            return self.matches
-        return []
+            self._refresh_matches_from_json(res)
+        return self.matches or []
 
     async def process_check_ins(self):
         """ finalize the check in phase
