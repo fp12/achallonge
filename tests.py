@@ -164,7 +164,6 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from p.change_email(email)
         self.assertNotEqual(p.email_hash, None)
 
-        username = 'pychallonge_async'
         yield from p.change_username(username)
         self.assertEqual(p.username, username)
 
@@ -184,11 +183,13 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(len(t.participants), 4)
         yield from self.user.destroy_tournament(t)
 
-    @unittest.skip('Failing')
+    # @unittest.skip('Failing')
     @async_test
     def test_f_checkin(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
+        p = yield from t.add_participant(username)
+        yield from t.add_participant('p1')
 
         new_start_date = datetime.now() + timedelta(minutes=5)
         yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
@@ -197,13 +198,20 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertNotEqual(t.start_at, None)
         self.assertNotEqual(t.check_in_duration, None)
 
-        p = yield from t.add_participant('p1')
+        total_time = 0.0
+        while p.checked_in_at is None and total_time <= 30.0:
+            try:
+                yield from p.check_in()
+            except Exception as e:
+                yield from asyncio.sleep(2.0)
+                total_time += 2.0
 
-        yield from p.check_in()
         self.assertNotEqual(p.checked_in_at, None)
 
         yield from p.undo_check_in()
         self.assertEqual(p.checked_in_at, None)
+
+        yield from self.user.destroy_tournament(t)
 
 
 # @unittest.skip('')
