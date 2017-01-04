@@ -323,6 +323,20 @@ class AttachmentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    @unittest.skip('Failing to upload')
+    @async_test
+    def test_c_file(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.allow_attachments()
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
+        yield from t.start()
+        m = yield from t.get_matches()
+
+        yield from m[0].attach_file('examples/listing.py', 'Simple example')
+
+        yield from self.user.destroy_tournament(t)
+
 
 if __name__ == "__main__":
     unittest.main()

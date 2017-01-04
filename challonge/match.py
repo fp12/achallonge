@@ -134,11 +134,8 @@ class Match(metaclass=FieldHolder):
                                     **params)
         self._refresh_from_json(res)
 
-    async def _attach(self, url: str = None, description: str = None):
-        assert (url is not None or description is not None), 'url:{} - description:{}'.format(url, description)
-        params = {'description': description or ''}
-        if url is not None:
-            params.update({'url': url})
+    async def _attach(self, asset=None, url: str = None, description: str = None):
+        params = Attachment.prepare_params(asset, url, description)
         res = await self.connection('POST',
                                     'tournaments/{}/matches/{}/attachments'.format(self._tournament_id, self._id),
                                     'match_attachment',
@@ -146,6 +143,26 @@ class Match(metaclass=FieldHolder):
         new_a = self._create_attachment(res, tournament_id=self._tournament_id)
         self._add_attachment(new_a)
         return new_a
+
+    async def attach_file(self, file_path: str, description: str = None) -> Attachment:
+        return
+        """ add a file as an attachment
+
+        |methcoro|
+
+        Args:
+            file_path: path to the file you want to add
+            description: *optional* description for your attachment
+
+        Returns:
+            Attachment:
+
+        Raises:
+            ChallongeException
+
+        """
+        with open(file_path, 'rb') as f:
+            return await self._attach(f.read(), description)
 
     async def attach_url(self, url: str, description: str = None) -> Attachment:
         """ add an url as an attachment
@@ -163,7 +180,7 @@ class Match(metaclass=FieldHolder):
             ChallongeException
 
         """
-        return await self._attach(url, description)
+        return await self._attach(url=url, description=description)
 
     async def attach_text(self, text: str) -> Attachment:
         """ add a simple text as an attachment

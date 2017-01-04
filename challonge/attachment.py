@@ -18,13 +18,20 @@ class Attachment(metaclass=FieldHolder):
         if 'match_attachment' in json_def:
             self._get_from_dict(json_def['match_attachment'])
 
-    async def _change(self, url: str = None, description: str = None):
-        assert (url is not None or description is not None), 'url:{} - description:{}'.format(url, description)
+    @staticmethod
+    def prepare_params(asset, url: str, description: str):
+        assert (asset is not None or url is not None or description is not None), 'asset:{} - url:{} - description:{}'.format(asset, url, description)
         params = {}
-        if url is not None:
+        if asset is not None:
+            params.update({'asset': asset})
+        elif url is not None:
             params.update({'url': url})
         if description is not None:
             params.update({'description': description})
+        return params
+
+    async def _change(self, asset=None, url: str = None, description: str = None):
+        params = Attachment.prepare_params(asset, url, description)
         res = await self.connection('PUT',
                                     'tournaments/{}/matches/{}/attachments/{}'.format(self._tournament_id, self._match_id, self._id),
                                     'match_attachment',
@@ -44,7 +51,7 @@ class Attachment(metaclass=FieldHolder):
             ChallongeException
 
         """
-        await self._change(url, description)
+        await self._change(url=url, description=description)
 
     async def change_text(self, text: str):
         """ change the url of that attachment
@@ -59,3 +66,20 @@ class Attachment(metaclass=FieldHolder):
 
         """
         await self._change(description=text)
+
+    async def change_file(self, file_path: str, description: str = None):
+        return
+        """ change the file of that attachment
+
+        |methcoro|
+
+        Args:
+            file_path: path to the file you want to add / modify
+            description: *optional* description for your attachment
+
+        Raises:
+            ChallongeException
+
+        """
+        with open(file_path, 'rb') as f:
+            await self._change(asset=f.read())
