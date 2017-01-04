@@ -354,3 +354,47 @@ class Tournament(metaclass=FieldHolder):
         if self.matches is not None:
             return self.matches
         return []
+
+    async def process_check_ins(self):
+        """ finalize the check in phase
+
+        |methcoro|
+
+        Notes:
+            |from_api| This should be invoked after a tournament's check-in window closes before the tournament is started.
+            1. Marks participants who have not checked in as inactive.
+            2. Moves inactive participants to bottom seeds (ordered by original seed).
+            3. Transitions the tournament state from 'checking_in' to 'checked_in'
+            NOTE: Checked in participants on the waiting list will be promoted if slots become available.
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {
+                'include_participants': 1,  # forced to 1 since we need to update the Participant instances
+                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+            }
+        res = await self.connection('POST', 'tournaments/{}/process_check_ins'.format(self._id), **params)
+        self._refresh_from_json(res)
+
+    async def abort_check_in(self):
+        """ abort the check in process
+
+        |methcoro|
+
+        Notes:
+            |from_api| When your tournament is in a 'checking_in' or 'checked_in' state, there's no way to edit the tournament's start time (start_at) or check-in duration (check_in_duration). You must first abort check-in, then you may edit those attributes.
+            1. Makes all participants active and clears their checked_in_at times.
+            2. Transitions the tournament state from 'checking_in' or 'checked_in' to 'pending'
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {
+                'include_participants': 1,  # forced to 1 since we need to update the Participant instances
+                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+            }
+        res = await self.connection('POST', 'tournaments/{}/abort_check_in'.format(self._id), **params)
+        self._refresh_from_json(res)

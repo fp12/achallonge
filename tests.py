@@ -6,7 +6,7 @@ import unittest
 import json
 from datetime import datetime, timedelta
 
-from challonge import User, get_user
+import challonge
 
 
 def get_credentials():
@@ -50,7 +50,7 @@ class AAACleanup(unittest.TestCase):
     """
     @async_test
     def test_cleanup(self):
-        user = yield from get_user(username, api_key)
+        user = yield from challonge.get_user(username, api_key)
         tournaments = yield from user.get_tournaments()
         for t in tournaments[:]:
             if t.name.startswith('pychallonge'):
@@ -62,14 +62,14 @@ class AAUserTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
     def test_a_init(self):
-        new_user = User(username, api_key)
+        new_user = challonge.User(username, api_key)
         self.assertNotEqual(new_user, None)
         yield from new_user.validate()  # can raise
 
     # @unittest.skip('')
     @async_test
     def test_b_get_tournaments(self):
-        new_user = yield from get_user(username, api_key)
+        new_user = yield from challonge.get_user(username, api_key)
         t = yield from new_user.get_tournaments()
         self.assertIsInstance(t, list)
 
@@ -78,7 +78,7 @@ class AAUserTestCase(unittest.TestCase):
 class ATournamentsTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
-        self.user = yield from get_user(username, api_key)
+        self.user = yield from challonge.get_user(username, api_key)
 
     # @unittest.skip('')
     @async_test
@@ -192,24 +192,52 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.add_participant('p1')
 
         new_start_date = datetime.now() + timedelta(minutes=5)
-        yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
-                                    new_start_date.strftime('%H:%M'),
-                                    10)
+        total_time = 0.0
+        while t.start_at is None and total_time <= 30.0:
+            try:
+                yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
+                                            new_start_date.strftime('%H:%M'),
+                                            10)
+            except challonge.ChallongeException:
+                yield from asyncio.sleep(2.0)
+                total_time += 2.0
+        if total_time != 0.0:
+            print('t.set_start_date success in {}s'.format(total_time))
+
         self.assertNotEqual(t.start_at, None)
         self.assertNotEqual(t.check_in_duration, None)
 
+        if False:
+            total_time = 0.0
+            while p.checked_in_at is None and total_time <= 30.0:
+                try:
+                    yield from p.check_in()
+                except challonge.ChallongeException:
+                    yield from asyncio.sleep(2.0)
+                    total_time += 2.0
+            if total_time != 0.0:
+                print('p.check_in() success in {}s'.format(total_time))
+
+            self.assertNotEqual(p.checked_in_at, None)
+
+            yield from p.undo_check_in()
+            self.assertEqual(p.checked_in_at, None)
+
+        self.assertNotEqual(t.state, 'checked_in')
         total_time = 0.0
-        while p.checked_in_at is None and total_time <= 30.0:
+        while t.state != 'checked_in' and total_time <= 30.0:
             try:
-                yield from p.check_in()
-            except Exception as e:
+                yield from t.process_check_ins()
+            except challonge.ChallongeException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
+        if total_time != 0.0:
+            print('t.process_check_ins() success in {}s'.format(total_time))
 
-        self.assertNotEqual(p.checked_in_at, None)
+        self.assertEqual(t.state, 'checked_in')
 
-        yield from p.undo_check_in()
-        self.assertEqual(p.checked_in_at, None)
+        yield from t.abort_check_in()
+        self.assertEqual(t.state, 'pending')
 
         yield from self.user.destroy_tournament(t)
 
@@ -218,7 +246,7 @@ class ATournamentsTestCase(unittest.TestCase):
 class MatchesTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
-        self.user = yield from get_user(username, api_key)
+        self.user = yield from challonge.get_user(username, api_key)
 
     # @unittest.skip('')
     @async_test
@@ -272,7 +300,7 @@ class MatchesTestCase(unittest.TestCase):
 class AttachmentsTestCase(unittest.TestCase):
     @async_test
     def setUp(self):
-        self.user = yield from get_user(username, api_key)
+        self.user = yield from challonge.get_user(username, api_key)
 
     # @unittest.skip('')
     @async_test
