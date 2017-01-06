@@ -186,7 +186,7 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(len(t.participants), 4)
         yield from self.user.destroy_tournament(t)
 
-    @unittest.skip('Failing')
+    @unittest.expectedFailure
     @async_test
     def test_f_checkin(self):
         random_name = get_random_name()
@@ -196,7 +196,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
         new_start_date = datetime.now() + timedelta(minutes=5)
         total_time = 0.0
-        while t.start_at is None and total_time <= 30.0:
+        while t.start_at is None and total_time <= 10.0:
             try:
                 yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
                                             new_start_date.strftime('%H:%M'),
@@ -212,7 +212,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
         if False:
             total_time = 0.0
-            while p.checked_in_at is None and total_time <= 30.0:
+            while p.checked_in_at is None and total_time <= 10.0:
                 try:
                     yield from p.check_in()
                 except challonge.ChallongeException:
@@ -228,7 +228,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
         self.assertNotEqual(t.state, 'checked_in')
         total_time = 0.0
-        while t.state != 'checked_in' and total_time <= 30.0:
+        while t.state != 'checked_in' and total_time <= 10.0:
             try:
                 yield from t.process_check_ins()
             except challonge.ChallongeException:
@@ -383,7 +383,7 @@ class AttachmentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
-    @unittest.skip('Failing to upload')
+    @unittest.expectedFailure
     @async_test
     def test_c_file(self):
         random_name = get_random_name()
