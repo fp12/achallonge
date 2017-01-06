@@ -210,7 +210,7 @@ class ATournamentsTestCase(unittest.TestCase):
                 total_time += 2.0
 
         if total_time >= max_time:
-            self.fail('failed at t.set_start_date')
+            'failed at t.set_start_date'
 
         total_time = 0.0
         while p.checked_in_at is None and total_time <= max_time:
@@ -222,7 +222,7 @@ class ATournamentsTestCase(unittest.TestCase):
                 total_time += 2.0
 
         if total_time >= max_time:
-            self.fail('failed at p.check_in()')
+            'failed at p.check_in()'
 
         yield from p.undo_check_in()
         self.assertEqual(p.checked_in_at, None)
@@ -238,14 +238,13 @@ class ATournamentsTestCase(unittest.TestCase):
                 total_time += 2.0
 
         if total_time >= max_time:
-            self.fail('failed at t.process_check_ins()')
+            'failed at t.process_check_ins()'
 
         yield from t.abort_check_in()
         self.assertEqual(t.state, 'pending')
 
         yield from self.user.destroy_tournament(t)
 
-        print('well it worked...', end=' ')
         self.fail('expected failure that sometimes work')
 
     # @unittest.skip('')

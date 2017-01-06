@@ -158,7 +158,6 @@ class Match(metaclass=FieldHolder):
         return new_a
 
     async def attach_file(self, file_path: str, description: str = None) -> Attachment:
-        return
         """ add a file as an attachment
 
         |methcoro|

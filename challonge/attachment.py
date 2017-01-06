@@ -70,7 +70,6 @@ class Attachment(metaclass=FieldHolder):
     change_description = change_text
 
     async def change_file(self, file_path: str, description: str = None):
-        return
         """ change the file of that attachment
 
         |methcoro|
