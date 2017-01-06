@@ -54,7 +54,7 @@ class Attachment(metaclass=FieldHolder):
         await self._change(url=url, description=description)
 
     async def change_text(self, text: str):
-        """ change the url of that attachment
+        """ change the text / description of that attachment
 
         |methcoro|
 
@@ -66,6 +66,8 @@ class Attachment(metaclass=FieldHolder):
 
         """
         await self._change(description=text)
+
+    change_description = change_text
 
     async def change_file(self, file_path: str, description: str = None):
         return

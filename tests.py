@@ -194,55 +194,59 @@ class ATournamentsTestCase(unittest.TestCase):
         p = yield from t.add_participant(username)
         yield from t.add_participant('p1')
 
+        max_time = 10.0
+
         new_start_date = datetime.now() + timedelta(minutes=5)
         total_time = 0.0
-        while t.start_at is None and total_time <= 10.0:
+        while t.start_at is None and total_time <= max_time:
             try:
                 yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
                                             new_start_date.strftime('%H:%M'),
                                             10)
+                self.assertNotEqual(t.start_at, None)
+                self.assertNotEqual(t.check_in_duration, None)
             except challonge.ChallongeException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
-        if total_time != 0.0:
-            print('t.set_start_date success in {}s'.format(total_time))
 
-        self.assertNotEqual(t.start_at, None)
-        self.assertNotEqual(t.check_in_duration, None)
+        if total_time >= max_time:
+            self.fail('failed at t.set_start_date')
 
-        if False:
-            total_time = 0.0
-            while p.checked_in_at is None and total_time <= 10.0:
-                try:
-                    yield from p.check_in()
-                except challonge.ChallongeException:
-                    yield from asyncio.sleep(2.0)
-                    total_time += 2.0
-            if total_time != 0.0:
-                print('p.check_in() success in {}s'.format(total_time))
+        total_time = 0.0
+        while p.checked_in_at is None and total_time <= max_time:
+            try:
+                yield from p.check_in()
+                self.assertNotEqual(p.checked_in_at, None)
+            except challonge.ChallongeException:
+                yield from asyncio.sleep(2.0)
+                total_time += 2.0
 
-            self.assertNotEqual(p.checked_in_at, None)
+        if total_time >= max_time:
+            self.fail('failed at p.check_in()')
 
-            yield from p.undo_check_in()
-            self.assertEqual(p.checked_in_at, None)
+        yield from p.undo_check_in()
+        self.assertEqual(p.checked_in_at, None)
 
         self.assertNotEqual(t.state, 'checked_in')
         total_time = 0.0
-        while t.state != 'checked_in' and total_time <= 10.0:
+        while t.state != 'checked_in' and total_time <= max_time:
             try:
                 yield from t.process_check_ins()
+                self.assertEqual(t.state, 'checked_in')
             except challonge.ChallongeException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
-        if total_time != 0.0:
-            print('t.process_check_ins() success in {}s'.format(total_time))
 
-        self.assertEqual(t.state, 'checked_in')
+        if total_time >= max_time:
+            self.fail('failed at t.process_check_ins()')
 
         yield from t.abort_check_in()
         self.assertEqual(t.state, 'pending')
 
         yield from self.user.destroy_tournament(t)
+
+        print('well it worked...', end=' ')
+        self.fail('expected failure that sometimes work')
 
     # @unittest.skip('')
     @async_test
@@ -262,7 +266,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
     # @unittest.skip('')
     @async_test
-    def test_h_participants_constistency(self):
+    def test_h_participants_consistency(self):
         random_name1 = get_random_name()
         t = yield from self.user.create_tournament(random_name1, random_name1)
         p1 = yield from t.add_participant('p1')
@@ -393,9 +397,17 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.start()
         m = yield from t.get_matches()
 
-        yield from m[0].attach_file('examples/listing.py', 'Simple example')
+        a = yield from m[0].attach_file('examples/listing.py', 'Simple example')
+        self.assertNotEqual(a.asset_url, None)
+
+        random_text = get_random_name()
+        yield from a.change_description(random_text)
+        self.assertEqual(a.description, random_text)
 
         yield from self.user.destroy_tournament(t)
+
+        print('well it worked...', end=' ')
+        self.fail('expected failure that sometimes work')
 
 
 if __name__ == "__main__":
