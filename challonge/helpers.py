@@ -1,5 +1,4 @@
 import aiohttp
-import functools
 
 from . import CHALLONGE_USE_FIELDS_DESCRIPTORS
 
@@ -100,12 +99,3 @@ class Connection:
 
 def get_connection(username, api_key, timeout=DEFAULT_TIMEOUT, loop=None):
     return Connection(username, api_key, timeout, loop)
-
-
-def partial_method(func, name, doc, *args1, **kwargs1):
-    @functools.wraps(func)  # copy attributes to start, they can be overwritten later
-    def method(self, *args2, **kwargs2):
-        return func(self, *args1, *args2, **kwargs1, **kwargs2)
-    method.__name__ = name
-    method.__doc__ = doc
-    return method

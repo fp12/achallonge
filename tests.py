@@ -109,8 +109,8 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(t.url, random_url)
 
         random_desc = get_random_name()
-        yield from t.update_url(random_desc)
-        self.assertEqual(t.url, random_desc)
+        yield from t.update_description(random_desc)
+        self.assertEqual(t.description, random_desc)
 
         yield from self.user.destroy_tournament(t)
 
@@ -137,6 +137,9 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from t.set_max_participants(25)
         self.assertEqual(t.signup_cap, 25)
+
+        yield from t.update_pairing_method(challonge.Pairing.sequential)
+        self.assertTrue(t.sequential_pairings)
 
         yield from self.user.destroy_tournament(t)
 
@@ -352,6 +355,9 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.setup_swiss_rounds(rounds)
         self.assertEqual(t.swiss_rounds, rounds)
 
+        yield from t.start()
+        yield from t.matches[0].report_tie('1-1')
+
         yield from self.user.destroy_tournament(t)
 
     # @unittest.skip('')
@@ -377,6 +383,9 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(float(t.rr_pts_for_game_win), 0.3)
         self.assertEqual(float(t.rr_pts_for_game_tie), 0.1)
 
+        yield from t.update_ranking_order(challonge.RankingOrder.points_scored)
+        self.assertEqual(t.ranked_by, challonge.RankingOrder.points_scored.value)
+
         yield from self.user.destroy_tournament(t)
 
     # @unittest.skip('')
@@ -394,6 +403,11 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from t.set_single_elim_third_place_match(True)
         self.assertTrue(t.hold_third_place_match)
+
+        yield from t.add_participants('p1', 'p2')
+        yield from t.start()
+        yield from t.matches[0].report_winner(t.participants[0], '1-0')
+        yield from t.finalize()
 
         yield from self.user.destroy_tournament(t)
 
