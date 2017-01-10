@@ -96,6 +96,49 @@ class ATournamentsTestCase(unittest.TestCase):
 
     # @unittest.skip('')
     @async_test
+    def test_a_a_basic_options(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+
+        random_name = get_random_name()
+        yield from t.update_name(random_name)
+        self.assertEqual(t.name, random_name)
+
+        random_url = get_random_name()
+        yield from t.update_url(random_url)
+        self.assertEqual(t.url, random_url)
+
+        random_desc = get_random_name()
+        yield from t.update_url(random_desc)
+        self.assertEqual(t.url, random_desc)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_a_b_options(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+
+        yield from t.update_website_options(hide_forum=True, show_rounds=False, open_signup=True)
+        self.assertTrue(t.hide_forum)
+        self.assertFalse(t.show_rounds)
+        self.assertTrue(t.open_signup)
+
+        yield from t.set_private()
+        self.assertTrue(t.private)
+
+        yield from t.set_private(False)
+        self.assertFalse(t.private)
+
+        yield from t.update_notifications(on_match_open=True, on_tournament_end=True)
+        self.assertTrue(t.notify_users_when_matches_open)
+        self.assertTrue(t.notify_users_when_the_tournament_ends)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
     def test_b_add_participants(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
@@ -273,6 +316,63 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.start()  # should order a refresh of participants
 
         self.assertTrue(p1 in t.participants)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_i_swiss(self):
+        random_name1 = get_random_name()
+        t = yield from self.user.create_tournament(random_name1, random_name1, challonge.TournamentType.swiss)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.swiss.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.round_robin)
+        self.assertNotEqual(t.tournament_type, challonge.TournamentType.swiss.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.swiss)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.swiss.value)
+
+        self.assertEqual(float(t.pts_for_match_win), 1.0)
+        self.assertEqual(float(t.pts_for_match_tie), 0.5)
+        self.assertEqual(float(t.pts_for_game_win), 0.0)
+        self.assertEqual(float(t.pts_for_game_tie), 0.0)
+        self.assertEqual(float(t.pts_for_bye), 1.0)
+        yield from t.setup_swiss_points(2.0, .7, .3, .1, .5)
+        self.assertEqual(float(t.pts_for_match_win), 2.0)
+        self.assertEqual(float(t.pts_for_match_tie), 0.7)
+        self.assertEqual(float(t.pts_for_game_win), 0.3)
+        self.assertEqual(float(t.pts_for_game_tie), 0.1)
+        self.assertEqual(float(t.pts_for_bye), 0.5)
+
+        rounds = 4
+        yield from t.add_participants(*[str(i) for i in range(9)])
+        yield from t.setup_swiss_rounds(rounds)
+        self.assertEqual(t.swiss_rounds, rounds)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_j_round_robin(self):
+        random_name1 = get_random_name()
+        t = yield from self.user.create_tournament(random_name1, random_name1, challonge.TournamentType.round_robin)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.round_robin.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.swiss)
+        self.assertNotEqual(t.tournament_type, challonge.TournamentType.round_robin.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.round_robin)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.round_robin.value)
+
+        self.assertEqual(float(t.rr_pts_for_match_win), 1.0)
+        self.assertEqual(float(t.rr_pts_for_match_tie), 0.5)
+        self.assertEqual(float(t.rr_pts_for_game_win), 0.0)
+        self.assertEqual(float(t.rr_pts_for_game_tie), 0.0)
+        yield from t.setup_round_robin_points(2.0, .7, .3, .1)
+        self.assertEqual(float(t.rr_pts_for_match_win), 2.0)
+        self.assertEqual(float(t.rr_pts_for_match_tie), 0.7)
+        self.assertEqual(float(t.rr_pts_for_game_win), 0.3)
+        self.assertEqual(float(t.rr_pts_for_game_tie), 0.1)
 
         yield from self.user.destroy_tournament(t)
 

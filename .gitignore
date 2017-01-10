@@ -1,4 +1,5 @@
 venv/
+htmlcov/
 *.pyc
 .secrets
 docs/_build

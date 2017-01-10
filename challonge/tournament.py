@@ -73,8 +73,10 @@ class Tournament(metaclass=FieldHolder):
                'accepting_predictions', 'participants_locked',
                'game_name', 'participants_swappable',
                'team_convertable', 'group_stages_were_started']
-    _update_parameters = ['name', 'tournament_type', 'url', 'subdomain', 'description', 'open_signup', 'hold_third_place_match', 'pts_for_match_win', 'pts_for_match_tie', 'pts_for_game_win', 'pts_for_game_tie', 'pts_for_bye', 'swiss_rounds',
-                          'ranked_by', ' rr_pts_for_match_win', 'rr_pts_for_match_tie', 'rr_pts_for_game_win', 'rr_pts_for_game_tie',
+
+    _update_parameters = ['name', 'tournament_type', 'url', 'subdomain', 'description', 'open_signup', 'hold_third_place_match',
+                          'pts_for_match_win', 'pts_for_match_tie', 'pts_for_game_win', 'pts_for_game_tie', 'pts_for_bye', 'swiss_rounds',
+                          'ranked_by', 'rr_pts_for_match_win', 'rr_pts_for_match_tie', 'rr_pts_for_game_win', 'rr_pts_for_game_tie',
                           'accept_attachments', 'hide_forum', 'show_rounds', 'private', 'notify_users_when_matches_open', 'notify_users_when_the_tournament_ends',
                           'sequential_pairings', 'signup_cap', 'start_at', 'check_in_duration', 'grand_finals_modifier']
 
@@ -208,7 +210,7 @@ class Tournament(metaclass=FieldHolder):
             ChallongeException
 
         """
-        assert all(k in self._update_parameters for k in params.keys()), 'Tournament.update: wrong parameter given'
+        assert all(k in self._update_parameters for k in params.keys()), 'Tournament.update: wrong parameter given ({})'.format(params.keys())
         res = await self.connection('PUT',
                                     'tournaments/{}'.format(self._id),
                                     'tournament',
@@ -406,7 +408,7 @@ class Tournament(metaclass=FieldHolder):
         """
         await self.update(swiss_rounds=rounds_count)
 
-    async def setup_round_robin_points(self, match_win: float = None, match_tie: float = None, game_win: float = None, game_tie: float = None, bye: float = None):
+    async def setup_round_robin_points(self, match_win: float = None, match_tie: float = None, game_win: float = None, game_tie: float = None):
         """
 
         |methcoro|
@@ -416,7 +418,6 @@ class Tournament(metaclass=FieldHolder):
             match_tie
             game_win
             game_tie
-            bye
 
         Raises:
             ChallongeException
@@ -431,8 +432,6 @@ class Tournament(metaclass=FieldHolder):
             params['rr_pts_for_game_win'] = game_win
         if match_win is not None:
             params['rr_pts_for_game_tie'] = game_tie
-        if match_win is not None:
-            params['rr_pts_for_bye'] = bye
         assert len(params) > 0
         await self.update(**params)
 
