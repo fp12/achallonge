@@ -97,6 +97,9 @@ class Tournament(metaclass=FieldHolder):
             t_data = json_def['tournament']
             self._get_from_dict(t_data)
 
+            # view missing fields
+            # print([(k, v) for k, v in t_data.items() if k not in self._fields])
+
             if 'participants' in t_data:
                 self._refresh_participants_from_json(t_data['participants'])
             if 'matches' in t_data:

@@ -96,7 +96,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
     # @unittest.skip('')
     @async_test
-    def test_a_a_basic_options(self):
+    def test_aa_basic_options(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
 
@@ -116,7 +116,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
     # @unittest.skip('')
     @async_test
-    def test_a_b_options(self):
+    def test_ab_options(self):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
 
@@ -134,6 +134,9 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.update_notifications(on_match_open=True, on_tournament_end=True)
         self.assertTrue(t.notify_users_when_matches_open)
         self.assertTrue(t.notify_users_when_the_tournament_ends)
+
+        yield from t.set_max_participants(25)
+        self.assertEqual(t.signup_cap, 25)
 
         yield from self.user.destroy_tournament(t)
 
@@ -309,8 +312,8 @@ class ATournamentsTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
     def test_h_participants_consistency(self):
-        random_name1 = get_random_name()
-        t = yield from self.user.create_tournament(random_name1, random_name1)
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
         p1 = yield from t.add_participant('p1')
         yield from t.add_participants('p2', 'p3', 'p4')
         yield from t.start()  # should order a refresh of participants
@@ -322,8 +325,8 @@ class ATournamentsTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
     def test_i_swiss(self):
-        random_name1 = get_random_name()
-        t = yield from self.user.create_tournament(random_name1, random_name1, challonge.TournamentType.swiss)
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name, challonge.TournamentType.swiss)
         self.assertEqual(t.tournament_type, challonge.TournamentType.swiss.value)
 
         yield from t.update_tournament_type(challonge.TournamentType.round_robin)
@@ -354,8 +357,8 @@ class ATournamentsTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test
     def test_j_round_robin(self):
-        random_name1 = get_random_name()
-        t = yield from self.user.create_tournament(random_name1, random_name1, challonge.TournamentType.round_robin)
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name, challonge.TournamentType.round_robin)
         self.assertEqual(t.tournament_type, challonge.TournamentType.round_robin.value)
 
         yield from t.update_tournament_type(challonge.TournamentType.swiss)
@@ -373,6 +376,41 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(float(t.rr_pts_for_match_tie), 0.7)
         self.assertEqual(float(t.rr_pts_for_game_win), 0.3)
         self.assertEqual(float(t.rr_pts_for_game_tie), 0.1)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_k_single_elim(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.single_elimination.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.swiss)
+        self.assertNotEqual(t.tournament_type, challonge.TournamentType.single_elimination.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.single_elimination)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.single_elimination.value)
+
+        yield from t.set_single_elim_third_place_match(True)
+        self.assertTrue(t.hold_third_place_match)
+
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_l_double_elim(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name, challonge.TournamentType.double_elimination)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.double_elimination.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.swiss)
+        self.assertNotEqual(t.tournament_type, challonge.TournamentType.double_elimination.value)
+
+        yield from t.update_tournament_type(challonge.TournamentType.double_elimination)
+        self.assertEqual(t.tournament_type, challonge.TournamentType.double_elimination.value)
+
+        yield from t.update_double_elim_ending(challonge.DoubleEliminationEnding.no_grand_finals)
 
         yield from self.user.destroy_tournament(t)
 
