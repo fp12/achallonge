@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/fp12/achallonge.svg?branch=master)](https://travis-ci.org/fp12/achallonge)
 [![Documentation Status](https://readthedocs.org/projects/achallonge/badge/?version=latest)](http://achallonge.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/fp12/achallonge/badge.svg)](https://coveralls.io/github/fp12/achallonge)
+[![Coverage Status](https://coveralls.io/repos/github/fp12/achallonge/badge.svg?branch=master)](https://coveralls.io/github/fp12/achallonge?branch=master)
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/cd2c13493bdf461695ada40356a9d3a1/badge.svg)](https://www.quantifiedcode.com/app/project/cd2c13493bdf461695ada40356a9d3a1)
 
 
