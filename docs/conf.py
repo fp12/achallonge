@@ -54,6 +54,8 @@ rst_prolog = """
 .. |methcoro| replace:: This method is a *coroutine* and needs to be awaited.
 .. |funccoro| replace:: This function is a *coroutine* and needs to be awaited.
 .. |from_api| replace:: *From Challonge API*:
+.. |unstable| replace:: This method has been tested but is not considered to be reliable, API-wise.
+.. |inprogress| replace:: This method is being worked on. Consider it a preview, and not a final version: it may change in a later version.
 """
 
 # The suffix(es) of source filenames.

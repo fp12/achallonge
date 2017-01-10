@@ -1,5 +1,4 @@
 .. currentmodule:: challonge
-.. module:: challonge
 
 
 API
@@ -17,6 +16,30 @@ User
 
 Tournament
 ----------
+
+.. class:: TournamentType
+	
+	.. attribute:: double_elimination
+	
+	.. attribute:: single_elimination
+	
+	.. attribute:: round_robin
+	
+	.. attribute:: swiss 
+
+
+.. class:: DoubleEliminationEnding
+
+	.. attribute:: default
+
+		give the winners bracket finalist two chances to beat the losers bracket finalist.
+	.. attribute:: single_match
+
+		create only one grand finals match.
+	.. attribute:: no_grand_finals
+
+		don't create a finals match between winners and losers bracket finalists.
+	
 
 .. autoclass:: challonge.Tournament
     :members:

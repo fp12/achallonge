@@ -26,6 +26,25 @@ class TournamentStateResult(Enum):
     pending = 1
 
 
+class DoubleEliminationEnding(Enum):
+    default = None
+    single_match = 'single_match'
+    no_grand_finals = 'skip'
+
+
+class RankingOrder(Enum):
+    match_wins = 'match wins'
+    game_wins = 'game wins'
+    points_scored = 'points scored'
+    points_difference = 'points difference'
+    custom = 'custom'
+
+
+class Pairing(Enum):
+    seeds = 0
+    sequential = 1
+
+
 class Tournament(metaclass=FieldHolder):
     """ representation of a Challonge tournament """
 
@@ -54,6 +73,10 @@ class Tournament(metaclass=FieldHolder):
                'accepting_predictions', 'participants_locked',
                'game_name', 'participants_swappable',
                'team_convertable', 'group_stages_were_started']
+    _update_parameters = ['name', 'tournament_type', 'url', 'subdomain', 'description', 'open_signup', 'hold_third_place_match', 'pts_for_match_win', 'pts_for_match_tie', 'pts_for_game_win', 'pts_for_game_tie', 'pts_for_bye', 'swiss_rounds',
+                          'ranked_by', ' rr_pts_for_match_win', 'rr_pts_for_match_tie', 'rr_pts_for_game_win', 'rr_pts_for_game_tie',
+                          'accept_attachments', 'hide_forum', 'show_rounds', 'private', 'notify_users_when_matches_open', 'notify_users_when_the_tournament_ends',
+                          'sequential_pairings', 'signup_cap', 'start_at', 'check_in_duration', 'grand_finals_modifier']
 
     def __init__(self, connection, json_def, **kwargs):
         self.connection = connection
@@ -165,6 +188,106 @@ class Tournament(metaclass=FieldHolder):
         res = await self.connection('POST', 'tournaments/{}/finalize'.format(self._id), **params)
         self._refresh_from_json(res)
 
+    async def update(self, **params):
+        """ update some parameters of the tournament
+
+        Use this function if you want to update multiple options at once, but prefer helpers functions like :func:`allow_attachments`, :func:`set_start_date`...
+
+        |methcoro|
+
+        Args:
+            params: one or more of: ``name`` ``tournament_type`` ``url`` ``subdomain`` ``description`` ``open_signup``
+                                    ``hold_third_place_match`` ``pts_for_match_win`` ``pts_for_match_tie`` ``pts_for_game_win``
+                                    ``pts_for_game_tie`` ``pts_for_bye`` ``swiss_rounds`` ``ranked_by`` ``rr_pts_for_match_win``
+                                    ``rr_pts_for_match_tie`` ``rr_pts_for_game_win`` ``rr_pts_for_game_tie`` ``accept_attachments``
+                                    ``hide_forum`` ``show_rounds`` ``private`` ``notify_users_when_matches_open``
+                                    ``notify_users_when_the_tournament_ends`` ``sequential_pairings`` ``signup_cap``
+                                    ``start_at`` ``check_in_duration`` ``grand_finals_modifier``
+
+        Raises:
+            ChallongeException
+
+        """
+        assert all(k in self._update_parameters for k in params.keys()), 'Tournament.update: wrong parameter given'
+        res = await self.connection('PUT',
+                                    'tournaments/{}'.format(self._id),
+                                    'tournament',
+                                    **params)
+        self._refresh_from_json(res)
+
+    async def update_tournament_type(self, tournament_type: TournamentType):
+        """
+
+        |methcoro|
+
+        Args:
+            tournament_type: choose between TournamentType.single_elimination, TournamentType.double_elimination, TournamentType.round_robin, TournamentType.swiss
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(tournament_type=tournament_type.value)
+
+    async def update_name(self, new_name: str):
+        """
+
+        |methcoro|
+
+        Args:
+            new_name: the name to be changed to (Max: 60 characters)
+
+        Raises:
+            ChallongeException
+
+        """
+        # TODO: check str 60 chars
+        await self.update(name=new_name)
+
+    async def update_url(self, new_url: str):
+        """
+
+        |methcoro|
+
+        Args:
+            new_url: the url to be changed to (challonge.com/url - letters, numbers, and underscores only)
+
+        Raises:
+            ChallongeException
+
+        """
+        # TODO: check format
+        await self.update(url=new_url)
+
+    async def update_subdomain(self, new_subdomain: str):
+        """
+
+        |methcoro|
+
+        Args:
+            new_subdomain: the subdomain to be changed to (subdomain.challonge.com/url - letters, numbers, and underscores only)
+
+        Raises:
+            ChallongeException: if you don't have write access to this subdomain
+
+        """
+        # TODO: check format
+        await self.update(subdomain=new_subdomain)
+
+    async def update_description(self, new_description: str):
+        """
+
+        |methcoro|
+
+        Args:
+            new_description: the description to be changed to
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(description=new_description)
+
     async def allow_attachments(self, allow: bool = True):
         """ allow this tournament to accept attachments or not
 
@@ -177,11 +300,7 @@ class Tournament(metaclass=FieldHolder):
             ChallongeException
 
         """
-        res = await self.connection('PUT',
-                                    'tournaments/{}'.format(self._id),
-                                    'tournament',
-                                    accept_attachments=allow)
-        self._refresh_from_json(res)
+        await self.update(accept_attachments=allow)
 
     async def set_start_date(self, date: str, time: str, check_in_duration: int = None):
         """ set the tournament start date (and check in duration)
@@ -204,6 +323,220 @@ class Tournament(metaclass=FieldHolder):
                                     start_at=date_time,
                                     check_in_duration=check_in_duration or 0)
         self._refresh_from_json(res)
+
+    async def update_double_elim_ending(self, ending: DoubleEliminationEnding):
+        """ update the ending format for your Double Elimination tournament
+
+        |methcoro|
+
+        Args:
+            ending: choose between:\
+            * DoubleEliminationEnding.default:  give the winners bracket finalist two chances to beat the losers bracket finalist
+            * DoubleEliminationEnding.single_match: create only one grand finals match
+            * DoubleEliminationEnding.no_grand_finals: don't create a finals match between winners and losers bracket finalists
+
+        Raises:
+            ChallongeException
+
+        """
+        # TODO: check double elim
+        await self.update(grand_finals_modifier=ending.value)
+        # TOGET: matches??
+
+    async def set_single_elim_third_place_match(self, play_third_place_match: bool):
+        """
+
+        |methcoro|
+
+        Args:
+            play_third_place_match: Include a match between semifinal losers if True
+
+        Raises:
+            ChallongeException
+
+        """
+        # TODO: check single elim
+        await self.update(hold_third_place_match=play_third_place_match)
+        # TOGET: matches??
+
+    async def setup_swiss_points(self, match_win: float = None, match_tie: float = None, game_win: float = None, game_tie: float = None, bye: float = None):
+        """
+
+        |methcoro|
+
+        Args:
+            match_win
+            match_tie
+            game_win
+            game_tie
+            bye
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {}
+        if match_win is not None:
+            params['pts_for_match_win'] = match_win
+        if match_win is not None:
+            params['pts_for_match_tie'] = match_tie
+        if match_win is not None:
+            params['pts_for_game_win'] = game_win
+        if match_win is not None:
+            params['pts_for_game_tie'] = game_tie
+        if match_win is not None:
+            params['pts_for_bye'] = bye
+        assert len(params) > 0
+        await self.update(**params)
+
+    async def setup_swiss_rounds(self, rounds_count: int):
+        """
+
+        |methcoro|
+
+        Note:
+            |from_api| We recommend limiting the number of rounds to less than two-thirds the number of players. Otherwise, an impossible pairing situation can be reached and your tournament may end before the desired number of rounds are played.
+
+        Args:
+            rounds_count:
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(swiss_rounds=rounds_count)
+
+    async def setup_round_robin_points(self, match_win: float = None, match_tie: float = None, game_win: float = None, game_tie: float = None, bye: float = None):
+        """
+
+        |methcoro|
+
+        Args:
+            match_win
+            match_tie
+            game_win
+            game_tie
+            bye
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {}
+        if match_win is not None:
+            params['rr_pts_for_match_win'] = match_win
+        if match_win is not None:
+            params['rr_pts_for_match_tie'] = match_tie
+        if match_win is not None:
+            params['rr_pts_for_game_win'] = game_win
+        if match_win is not None:
+            params['rr_pts_for_game_tie'] = game_tie
+        if match_win is not None:
+            params['rr_pts_for_bye'] = bye
+        assert len(params) > 0
+        await self.update(**params)
+
+    async def update_notifications(self, on_match_open: bool = None, on_tournament_end: bool = None):
+        """ update participants notifications for this tournament
+
+        |methcoro|
+
+        Args:
+            on_match_open: Email registered Challonge participants when matches open up for them
+            on_tournament_end: Email registered Challonge participants the results when this tournament ends
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {}
+        if on_match_open is not None:
+            params['notify_users_when_matches_open'] = on_match_open
+        if on_tournament_end is not None:
+            params['notify_users_when_the_tournament_ends'] = on_tournament_end
+        assert len(params) > 0
+        await self.update(**params)
+
+    async def set_max_participants(self, max_participants: int):
+        """
+
+        |methcoro|
+
+        Args:
+            max_participants: Maximum number of participants in the bracket. A waiting list (attribute on Participant) will capture participants once the cap is reached.
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(signup_cap=max_participants)
+
+    async def set_private(self, private: bool = True):
+        """
+
+        |methcoro|
+
+        Args:
+            private: Hide this tournament from the public browsable index and your profile
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(private=private)
+
+    async def update_ranking_order(self, order: RankingOrder):
+        """
+
+        |methcoro|
+
+        Args:
+            order
+
+        Raises:
+            ChallongeException
+
+        """
+        await self.update(ranked_by=order.value)
+
+    async def update_website_options(self, hide_forum: bool = None, show_rounds: bool = None, open_signup: bool = None):
+        """
+
+        |methcoro|
+
+        Args:
+            hide_forum: Hide the forum tab on your Challonge page
+            show_rounds: Double Elimination only - Label each round above the bracket
+            open_signup: Have Challonge host a sign-up page (otherwise, you manually add all participants)
+
+        Raises:
+            ChallongeException
+
+        """
+        params = {}
+        if hide_forum is not None:
+            params['hide_forum'] = hide_forum
+        if show_rounds is not None:
+            params['show_rounds'] = show_rounds
+        if open_signup is not None:
+            params['open_signup'] = open_signup
+        assert len(params) > 0
+        await self.update(**params)
+
+    async def update_pairing_method(self, pairing: Pairing):
+        """
+
+        |methcoro|
+
+        Args:
+            pairing:
+
+        Raises:
+            ChallongeException
+
+        """
+        do_sequential_pairing = pairing == Pairing.sequential
+        await self.update(sequential_pairings=do_sequential_pairing)
 
     async def get_participant(self, p_id: int, force_update=False) -> Participant:
         """ get a participant by its id
@@ -310,15 +643,24 @@ class Tournament(metaclass=FieldHolder):
         self._add_participant(new_p)
         return new_p
 
-    # not documented because may need to be improved
     async def add_participants(self, *names: str) -> list:
+        """
+
+        |methcoro|
+
+        Warnings:
+            |inprogress|
+
+        Raises:
+            ChallongeException
+
+        """
         params = {'name': list(names)}
         res = await self.connection('POST',
                                     'tournaments/{}/participants/bulk_add'.format(self._id),
                                     'participants[]',
                                     **params)
         self._refresh_participants_from_json(res)
-        return self.participants
 
     async def remove_participant(self, p: Participant):
         """ remove a participant from the tournament
@@ -370,7 +712,10 @@ class Tournament(metaclass=FieldHolder):
 
         |methcoro|
 
-        Notes:
+        Warning:
+            |unstable|
+
+        Note:
             |from_api| This should be invoked after a tournament's check-in window closes before the tournament is started.
             1. Marks participants who have not checked in as inactive.
             2. Moves inactive participants to bottom seeds (ordered by original seed).
@@ -393,7 +738,10 @@ class Tournament(metaclass=FieldHolder):
 
         |methcoro|
 
-        Notes:
+        Warning:
+            |unstable|
+
+        Note:
             |from_api| When your tournament is in a 'checking_in' or 'checked_in' state, there's no way to edit the tournament's start time (start_at) or check-in duration (check_in_duration). You must first abort check-in, then you may edit those attributes.
             1. Makes all participants active and clears their checked_in_at times.
             2. Transitions the tournament state from 'checking_in' or 'checked_in' to 'pending'

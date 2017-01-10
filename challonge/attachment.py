@@ -74,6 +74,9 @@ class Attachment(metaclass=FieldHolder):
 
         |methcoro|
 
+        Warning:
+            |unstable|
+
         Args:
             file_path: path to the file you want to add / modify
             description: *optional* description for your attachment

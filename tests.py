@@ -403,6 +403,9 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from a.change_description(random_text)
         self.assertEqual(a.description, random_text)
 
+        yield from a.change_file('examples/create.py')
+        self.assertNotEqual(a.asset_url, None)
+
         yield from self.user.destroy_tournament(t)
 
         print('well it worked...', end=' ')

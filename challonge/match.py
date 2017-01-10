@@ -162,6 +162,9 @@ class Match(metaclass=FieldHolder):
 
         |methcoro|
 
+        Warning:
+            |unstable|
+
         Args:
             file_path: path to the file you want to add
             description: *optional* description for your attachment

@@ -99,7 +99,6 @@ class Participant(metaclass=FieldHolder):
 
     async def change_misc(self, misc: str) -> str:
         """
-
         |methcoro|
 
         Note:
@@ -115,15 +114,30 @@ class Participant(metaclass=FieldHolder):
         await self._change(misc=misc)
 
     async def check_in(self):
+        """
+
+        |methcoro|
+
+        Warning:
+            |unstable|
+
+        Raises:
+            ChallongeException
+
+        """
         res = await self.connection('POST', 'tournaments/{}/participants/{}/check_in'.format(self._tournament_id, self._id))
-        if 'participant' in res and 'checked_in_at' in res['participant']:
-            self._checked_in_at = res['participant']['checked_in_at']
-            return self._checked_in_at
-        return None
+        self._refresh_from_json(res)
 
     async def undo_check_in(self):
+        """
+        |methcoro|
+
+        Warning:
+            |unstable|
+
+        Raises:
+            ChallongeException
+
+        """
         res = await self.connection('POST', 'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id))
-        if 'participant' in res and 'checked_in_at' in res['participant']:
-            self._checked_in_at = res['participant']['checked_in_at']
-            return self._checked_in_at
-        return False
+        self._refresh_from_json(res)
