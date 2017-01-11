@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from . import CHALLONGE_AUTO_GET_PARTICIPANTS, CHALLONGE_AUTO_GET_MATCHES
-from .helpers import FieldHolder
+from .helpers import FieldHolder, assert_or_raise
 from .participant import Participant
 from .match import Match
 
@@ -144,7 +144,7 @@ class Tournament(metaclass=FieldHolder):
             |from_api| Start a tournament, opening up first round matches for score reporting. The tournament must have at least 2 participants.
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {
@@ -163,7 +163,7 @@ class Tournament(metaclass=FieldHolder):
             |from_api| Reset a tournament, clearing all of its scores and attachments. You can then add/remove/edit participants before starting the tournament again.
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {
@@ -182,7 +182,7 @@ class Tournament(metaclass=FieldHolder):
             |from_api| Finalize a tournament that has had all match scores submitted, rendering its results permanent.
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {
@@ -209,10 +209,13 @@ class Tournament(metaclass=FieldHolder):
                                     ``start_at`` ``check_in_duration`` ``grand_finals_modifier``
 
         Raises:
-            ChallongeException
+            APIException
 
         """
-        assert all(k in self._update_parameters for k in params.keys()), 'Tournament.update: wrong parameter given ({})'.format(params.keys())
+        assert_or_raise(all(k in self._update_parameters for k in params.keys()),
+                        NameError,
+                        'Wrong parameter given')
+
         res = await self.connection('PUT',
                                     'tournaments/{}'.format(self._id),
                                     'tournament',
@@ -228,7 +231,7 @@ class Tournament(metaclass=FieldHolder):
             tournament_type: choose between TournamentType.single_elimination, TournamentType.double_elimination, TournamentType.round_robin, TournamentType.swiss
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(tournament_type=tournament_type.value)
@@ -242,7 +245,7 @@ class Tournament(metaclass=FieldHolder):
             new_name: the name to be changed to (Max: 60 characters)
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         # TODO: check str 60 chars
@@ -257,7 +260,7 @@ class Tournament(metaclass=FieldHolder):
             new_url: the url to be changed to (challonge.com/url - letters, numbers, and underscores only)
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         # TODO: check format
@@ -272,7 +275,7 @@ class Tournament(metaclass=FieldHolder):
             new_subdomain: the subdomain to be changed to (subdomain.challonge.com/url - letters, numbers, and underscores only)
 
         Raises:
-            ChallongeException: if you don't have write access to this subdomain
+            APIException: if you don't have write access to this subdomain
 
         """
         # TODO: check format
@@ -287,7 +290,7 @@ class Tournament(metaclass=FieldHolder):
             new_description: the description to be changed to
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(description=new_description)
@@ -301,7 +304,7 @@ class Tournament(metaclass=FieldHolder):
             allow (default=True): False to disallow
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(accept_attachments=allow)
@@ -317,7 +320,7 @@ class Tournament(metaclass=FieldHolder):
             check_in_duration (optional): duration in minutes
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         date_time = datetime.strptime(date + ' ' + time, '%Y/%m/%d %H:%M')
@@ -340,12 +343,10 @@ class Tournament(metaclass=FieldHolder):
             * DoubleEliminationEnding.no_grand_finals: don't create a finals match between winners and losers bracket finalists
 
         Raises:
-            ChallongeException
+            APIException
 
         """
-        # TODO: check double elim
         await self.update(grand_finals_modifier=ending.value)
-        # TOGET: matches??
 
     async def set_single_elim_third_place_match(self, play_third_place_match: bool):
         """
@@ -356,12 +357,10 @@ class Tournament(metaclass=FieldHolder):
             play_third_place_match: Include a match between semifinal losers if True
 
         Raises:
-            ChallongeException
+            APIException
 
         """
-        # TODO: check single elim
         await self.update(hold_third_place_match=play_third_place_match)
-        # TOGET: matches??
 
     async def setup_swiss_points(self, match_win: float = None, match_tie: float = None, game_win: float = None, game_tie: float = None, bye: float = None):
         """
@@ -376,7 +375,7 @@ class Tournament(metaclass=FieldHolder):
             bye
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {}
@@ -390,7 +389,7 @@ class Tournament(metaclass=FieldHolder):
             params['pts_for_game_tie'] = game_tie
         if match_win is not None:
             params['pts_for_bye'] = bye
-        assert len(params) > 0
+        assert_or_raise(len(params) > 0, ValueError, 'At least one of the points must be given')
         await self.update(**params)
 
     async def setup_swiss_rounds(self, rounds_count: int):
@@ -405,7 +404,7 @@ class Tournament(metaclass=FieldHolder):
             rounds_count:
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(swiss_rounds=rounds_count)
@@ -422,7 +421,7 @@ class Tournament(metaclass=FieldHolder):
             game_tie
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {}
@@ -434,7 +433,7 @@ class Tournament(metaclass=FieldHolder):
             params['rr_pts_for_game_win'] = game_win
         if match_win is not None:
             params['rr_pts_for_game_tie'] = game_tie
-        assert len(params) > 0
+        assert_or_raise(len(params) > 0, ValueError, 'At least one of the points must be given')
         await self.update(**params)
 
     async def update_notifications(self, on_match_open: bool = None, on_tournament_end: bool = None):
@@ -447,7 +446,7 @@ class Tournament(metaclass=FieldHolder):
             on_tournament_end: Email registered Challonge participants the results when this tournament ends
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {}
@@ -455,7 +454,7 @@ class Tournament(metaclass=FieldHolder):
             params['notify_users_when_matches_open'] = on_match_open
         if on_tournament_end is not None:
             params['notify_users_when_the_tournament_ends'] = on_tournament_end
-        assert len(params) > 0
+        assert_or_raise(len(params) > 0, ValueError, 'At least one of the notifications must be given')
         await self.update(**params)
 
     async def set_max_participants(self, max_participants: int):
@@ -467,7 +466,7 @@ class Tournament(metaclass=FieldHolder):
             max_participants: Maximum number of participants in the bracket. A waiting list (attribute on Participant) will capture participants once the cap is reached.
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(signup_cap=max_participants)
@@ -481,7 +480,7 @@ class Tournament(metaclass=FieldHolder):
             private: Hide this tournament from the public browsable index and your profile
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(private=private)
@@ -495,7 +494,7 @@ class Tournament(metaclass=FieldHolder):
             order
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.update(ranked_by=order.value)
@@ -511,7 +510,7 @@ class Tournament(metaclass=FieldHolder):
             open_signup: Have Challonge host a sign-up page (otherwise, you manually add all participants)
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {}
@@ -521,7 +520,7 @@ class Tournament(metaclass=FieldHolder):
             params['show_rounds'] = show_rounds
         if open_signup is not None:
             params['open_signup'] = open_signup
-        assert len(params) > 0
+        assert_or_raise(len(params) > 0, ValueError, 'At least one of the options must be given')
         await self.update(**params)
 
     async def update_pairing_method(self, pairing: Pairing):
@@ -533,7 +532,7 @@ class Tournament(metaclass=FieldHolder):
             pairing:
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         do_sequential_pairing = pairing == Pairing.sequential
@@ -552,7 +551,7 @@ class Tournament(metaclass=FieldHolder):
             Participant: None if not found
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         found_p = self._find_participant(p_id)
@@ -573,7 +572,7 @@ class Tournament(metaclass=FieldHolder):
             list[Participant]:
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         if force_update or self.participants is None:
@@ -595,7 +594,7 @@ class Tournament(metaclass=FieldHolder):
             Participant: None if not found
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         if force_update or self.participants is None:
@@ -622,10 +621,13 @@ class Tournament(metaclass=FieldHolder):
             Participant: newly created participant
 
         Raises:
-            ChallongeException
+            APIException
 
         """
-        assert((display_name is None) ^ (username is None))
+        assert_or_raise((display_name is None) ^ (username is None),
+                        ValueError,
+                        'One of display_name or username must not be None')
+
         params = {
             'name': display_name or '',
             'challonge_username': username or '',
@@ -653,7 +655,7 @@ class Tournament(metaclass=FieldHolder):
             |inprogress|
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {'name': list(names)}
@@ -672,15 +674,12 @@ class Tournament(metaclass=FieldHolder):
             p: the participant to remove
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.connection('DELETE', 'tournaments/{}/participants/{}'.format(self._id, p._id))
         if p in self.participants:
             self.participants.remove(p)
-        else:
-            # TODO: error management
-            pass
 
     async def get_matches(self, force_update=False) -> list:
         """ get all matches (once the tournament is started)
@@ -694,12 +693,9 @@ class Tournament(metaclass=FieldHolder):
             list[Match]:
 
         Raises:
-            ChallongeException
+            APIException
 
         """
-        if self._state != 'underway':
-            print('tournament may not be started')
-
         if force_update or self.matches is None:
             params = {'include_attachments': 1}
             res = await self.connection('GET',
@@ -724,7 +720,7 @@ class Tournament(metaclass=FieldHolder):
             NOTE: Checked in participants on the waiting list will be promoted if slots become available.
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {
@@ -748,7 +744,7 @@ class Tournament(metaclass=FieldHolder):
             2. Transitions the tournament state from 'checking_in' or 'checked_in' to 'pending'
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params = {

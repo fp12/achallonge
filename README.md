@@ -1,5 +1,5 @@
 # achallonge
-*Async Challonge for Python 3.5+*
+*async Challonge for Python 3.5+*
 
 [![Build Status](https://travis-ci.org/fp12/achallonge.svg?branch=master)](https://travis-ci.org/fp12/achallonge)
 [![Documentation Status](https://readthedocs.org/projects/achallonge/badge/?version=latest)](http://achallonge.readthedocs.io/en/latest/?badge=latest)
@@ -39,11 +39,23 @@ async def pychallonge_async()
 
     # Tournaments, matches, and participants are all represented as Python classes
     for t in tournaments:
-		print(t.id) # 3272
-		print(t.name) # My Awesome Tournament
-		print(t.status) # open
+		print(t.id)  # 3272
+		print(t.name)  # 'My Awesome Tournament'
+		print(t.status)  # 'open'
 
     # Retrieve the participants for a given tournament.
     participants = await tournaments[0].get_participants()
     print(len(participants)) # 13
 ```
+
+# Documentation
+
+The full documentation can be found on [Read the docs](http://achallonge.readthedocs.io/en/latest/index.html)
+
+# Author / License
+
+Distributed under MIT license. See `LICENSE` for details
+
+Fabien Poupineau (fp12) - 2017
+Twitter: [@fp12gaming](https://twitter.com/fp12gaming)
+Join the [Discord Server](https://discord.gg/KSRxBav) and discuss about this lib!

@@ -1,9 +1,8 @@
-from .helpers import FieldHolder
+from .helpers import FieldHolder, assert_or_raise
 
 
 class Attachment(metaclass=FieldHolder):
     """ representation of a Challonge match attachment """
-
     _fields = ['id', 'match_id', 'user_id', 'description',
                'url', 'original_file_name', 'created_at',
                'updated_at', 'asset_file_name', 'asset_content_type',
@@ -20,7 +19,9 @@ class Attachment(metaclass=FieldHolder):
 
     @staticmethod
     def prepare_params(asset, url: str, description: str):
-        assert (asset is not None or url is not None or description is not None), 'asset:{} - url:{} - description:{}'.format(asset, url, description)
+        assert_or_raise(asset is not None or url is not None or description is not None,
+                        ValueError,
+                        'One of the following must not be None: asset, url, description')
         params = {}
         if asset is not None:
             params.update({'asset': asset})
@@ -48,7 +49,8 @@ class Attachment(metaclass=FieldHolder):
             description: *optional* description for your attachment
 
         Raises:
-            ChallongeException
+            ValueError: url must not be None
+            APIException
 
         """
         await self._change(url=url, description=description)
@@ -62,7 +64,8 @@ class Attachment(metaclass=FieldHolder):
             text: content you want to add / modify (description)
 
         Raises:
-            ChallongeException
+            ValueError: text must not be None
+            APIException
 
         """
         await self._change(description=text)
@@ -82,7 +85,8 @@ class Attachment(metaclass=FieldHolder):
             description: *optional* description for your attachment
 
         Raises:
-            ChallongeException
+            ValueError: file_path must not be None
+            APIException
 
         """
         with open(file_path, 'rb') as f:

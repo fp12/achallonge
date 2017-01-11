@@ -70,7 +70,7 @@ Attachment
     :member-order: bysource
 
 
-Exception
----------
+Exceptions
+----------
 
-.. autoclass:: challonge.ChallongeException
+.. autoclass:: challonge.APIException

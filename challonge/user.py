@@ -37,7 +37,7 @@ class User:
         |methcoro|
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.connection('GET', 'tournaments')
@@ -55,7 +55,7 @@ class User:
             Tournament
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         found_t = self._find_tournament(t_id)
@@ -77,7 +77,7 @@ class User:
             list[Tournament]: list of all the user tournaments
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         if force_update or self.tournaments is None:
@@ -106,7 +106,7 @@ class User:
             Tournament: the newly created tournament
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         params.update({
@@ -128,15 +128,12 @@ class User:
             |from_api| Deletes a tournament along with all its associated records. There is no undo, so use with care!
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.connection('DELETE', 'tournaments/{}'.format(t.id))
         if t in self.tournaments:
             self.tournaments.remove(t)
-        else:
-            # TODO: error management
-            pass
 
 
 async def get_user(username: str, api_key: str, **kwargs) -> User:
@@ -153,7 +150,7 @@ async def get_user(username: str, api_key: str, **kwargs) -> User:
         User: a logged in user if no exception has been raised
 
     Raises:
-        ChallongeException
+        APIException
 
     """
     new_user = User(username, api_key, **kwargs)

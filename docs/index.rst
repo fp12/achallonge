@@ -41,7 +41,7 @@ Author and License
 
 The ``achallonge`` package is written by Fabien Poupineau (fp12).
 
-It's covered under the *MIT* license.
+It's distributed under the *MIT* license.
 
 Feel free to improve this package and send a pull request to GitHub_.
 

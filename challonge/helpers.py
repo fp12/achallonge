@@ -1,14 +1,22 @@
 import aiohttp
 
-from . import CHALLONGE_USE_FIELDS_DESCRIPTORS
+from . import CHALLONGE_USE_FIELDS_DESCRIPTORS, CHALLONGE_USE_EXCEPTIONS
 
 
 DEFAULT_TIMEOUT = 30
 
 
-class ChallongeException(Exception):
-    """ If anything goes wrong during the request to the Challonge API, this exception will be raised """
+class APIException(Exception):
+    """ If anything goes wrong during a request to the Challonge API, this exception will be raised. """
     pass
+
+
+def assert_or_raise(cond, exc, msg: str = None):
+    if not cond:
+        if CHALLONGE_USE_EXCEPTIONS:
+            raise exc(msg)
+        else:
+            print('a silent exception `{.__name__}` has been raised `{}`'.format(exc, msg))
 
 
 class FieldDescriptor:
@@ -61,6 +69,14 @@ class Connection:
         self.loop = loop
 
     async def __call__(self, method: str, uri: str, params_prefix: str =None, **params):
+        """ responses codes:
+        200 - OK
+        401 - Unauthorized (Invalid API key or insufficient permissions)
+        404 - Object not found within your account scope
+        406 - Requested format is not supported - request JSON or XML only
+        422 - Validation error(s) for create or update method
+        500 - Something went wrong on our end. If you continually receive this, please contact us.
+        """
         params = self._prepare_params(params, params_prefix)
         # print(params)
 
@@ -72,8 +88,10 @@ class Connection:
                 auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
                 async with session.request(method, url, params=params, auth=auth) as response:
                     resp = await response.json()
-                    if response.status >= 400:
-                        raise ChallongeException(uri, params, response.reason)
+                    if response.status in [401, 404, 406, 422, 500]:
+                        raise APIException(uri, params, response.reason)
+                    if response.status != 200:
+                        raise ValueError
                     return resp
         return None
 

@@ -41,7 +41,7 @@ class Participant(metaclass=FieldHolder):
             new_name: as described
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._change(name=new_name)
@@ -55,7 +55,7 @@ class Participant(metaclass=FieldHolder):
             username: Challonge username
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._change(challonge_username=username)
@@ -73,7 +73,7 @@ class Participant(metaclass=FieldHolder):
             email: as described
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._change(email=email)
@@ -93,7 +93,7 @@ class Participant(metaclass=FieldHolder):
             the same seed number as passed or `None` if something failed
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._change(seed=new_seed)
@@ -109,7 +109,7 @@ class Participant(metaclass=FieldHolder):
             misc: str content
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._change(misc=misc)
@@ -123,7 +123,7 @@ class Participant(metaclass=FieldHolder):
             |unstable|
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         res = await self.connection('POST', 'tournaments/{}/participants/{}/check_in'.format(self._tournament_id, self._id))
@@ -137,7 +137,7 @@ class Participant(metaclass=FieldHolder):
             |unstable|
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         res = await self.connection('POST', 'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id))

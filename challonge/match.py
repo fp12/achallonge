@@ -1,6 +1,6 @@
 import re
 
-from .helpers import FieldHolder
+from .helpers import FieldHolder, assert_or_raise
 from .participant import Participant
 from .attachment import Attachment
 
@@ -56,8 +56,8 @@ class Match(metaclass=FieldHolder):
                 self.attachments.append(a)
 
     async def _report(self, scores_csv, winner=None):
-        if not verify_score_format(scores_csv):
-            raise ValueError('Bad score format')
+        assert_or_raise(verify_score_format(scores_csv), ValueError, 'Wrong score format')
+
         params = {'scores_csv': scores_csv}
         if winner:
             params.update({'winner_id': winner})
@@ -76,7 +76,8 @@ class Match(metaclass=FieldHolder):
             scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
 
         Raises:
-            ChallongeException
+            ValueError: scores_csv has a wrong format
+            APIException
 
         """
         await self._report(scores_csv)
@@ -91,7 +92,8 @@ class Match(metaclass=FieldHolder):
             scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
 
         Raises:
-            ChallongeException
+            ValueError: scores_csv has a wrong format
+            APIException
 
         """
         await self._report(scores_csv, winner._id)
@@ -105,7 +107,7 @@ class Match(metaclass=FieldHolder):
             scores_csv: Comma separated set/game scores with player 1 score first (e.g. "1-3,3-0,3-2")
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self._report(scores_csv, 'tie')
@@ -124,10 +126,14 @@ class Match(metaclass=FieldHolder):
             add: if set, votes in parameters will be added instead of overriden
 
         Raises:
-            ChallongeException
+            ValueError: one of the votes arguments must not be None
+            APIException
 
         """
-        assert player1_votes is not None or player2_votes is not None
+        assert_or_raise(player1_votes is not None or player2_votes is not None,
+                        ValueError,
+                        'One of the votes must not be None')
+
         if add:
             # order a fresh update of this match
             res = await self.connection('GET', 'tournaments/{}/matches/{}'.format(self._tournament_id, self._id))
@@ -174,7 +180,8 @@ class Match(metaclass=FieldHolder):
             Attachment:
 
         Raises:
-            ChallongeException
+            ValueError: file_path must not be None
+            APIException
 
         """
         with open(file_path, 'rb') as f:
@@ -193,7 +200,8 @@ class Match(metaclass=FieldHolder):
             Attachment:
 
         Raises:
-            ChallongeException
+            ValueError: url must not be None
+            APIException
 
         """
         return await self._attach(url=url, description=description)
@@ -210,7 +218,8 @@ class Match(metaclass=FieldHolder):
             Attachment: newly created instance
 
         Raises:
-            ChallongeException
+            ValueError: text must not be None
+            APIException
 
         """
         return await self._attach(description=text)
@@ -221,15 +230,12 @@ class Match(metaclass=FieldHolder):
         |methcoro|
 
         Args:
-            a: the attachment your want to destroy
+            a: the attachment you want to destroy
 
         Raises:
-            ChallongeException
+            APIException
 
         """
         await self.connection('DELETE', 'tournaments/{}/matches/{}/attachments/{}'.format(self._tournament_id, self._id, a._id))
         if a in self.attachments:
             self.attachments.remove(a)
-        else:
-            # TODO: error management
-            pass

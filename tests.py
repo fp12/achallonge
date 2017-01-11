@@ -254,7 +254,7 @@ class ATournamentsTestCase(unittest.TestCase):
                                             10)
                 self.assertNotEqual(t.start_at, None)
                 self.assertNotEqual(t.check_in_duration, None)
-            except challonge.ChallongeException:
+            except challonge.APIException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
 
@@ -266,7 +266,7 @@ class ATournamentsTestCase(unittest.TestCase):
             try:
                 yield from p.check_in()
                 self.assertNotEqual(p.checked_in_at, None)
-            except challonge.ChallongeException:
+            except challonge.APIException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
 
@@ -282,7 +282,7 @@ class ATournamentsTestCase(unittest.TestCase):
             try:
                 yield from t.process_check_ins()
                 self.assertEqual(t.state, 'checked_in')
-            except challonge.ChallongeException:
+            except challonge.APIException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
 
