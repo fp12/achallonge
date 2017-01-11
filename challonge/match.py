@@ -20,7 +20,8 @@ class Match(metaclass=FieldHolder):
                'player2_is_prereq_match_loser', 'player2_prereq_match_id',
                'player2_votes', 'round', 'scheduled_time', 'started_at',
                'state', 'tournament_id', 'underway_at', 'updated_at',
-               'winner_id', 'prerequisite_match_ids_csv', 'scores_csv']
+               'winner_id', 'prerequisite_match_ids_csv', 'scores_csv',
+               'optional', 'rushb_id', 'completed_at', 'suggested_play_order']
 
     def __init__(self, connection, json_def, **kwargs):
         self.connection = connection

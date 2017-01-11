@@ -60,7 +60,7 @@ class Tournament(metaclass=FieldHolder):
                'predictions_opened_at', 'private', 'progress_meter',
                'pts_for_bye', 'pts_for_game_tie', 'pts_for_game_win',
                'pts_for_match_tie', 'pts_for_match_win', 'quick_advance',
-               'ranked_by', 'require_shelpers_agreement',
+               'ranked_by', 'require_score_agreement',
                'rr_pts_for_game_tie', 'rr_pts_for_game_win',
                'rr_pts_for_match_tie', 'rr_pts_for_match_win',
                'sequential_pairings', 'show_rounds', 'signup_cap',
@@ -72,7 +72,9 @@ class Tournament(metaclass=FieldHolder):
                'sign_up_url', 'review_before_finalizing',
                'accepting_predictions', 'participants_locked',
                'game_name', 'participants_swappable',
-               'team_convertable', 'group_stages_were_started']
+               'team_convertable', 'group_stages_were_started',
+               'locked_at', 'event_id', 'public_predictions_before_start_time',
+               'ranked', 'grand_finals_modifier', 'predict_the_losers_bracket']
 
     _update_parameters = ['name', 'tournament_type', 'url', 'subdomain', 'description', 'open_signup', 'hold_third_place_match',
                           'pts_for_match_win', 'pts_for_match_tie', 'pts_for_game_win', 'pts_for_game_tie', 'pts_for_bye', 'swiss_rounds',
@@ -96,9 +98,6 @@ class Tournament(metaclass=FieldHolder):
         if 'tournament' in json_def:
             t_data = json_def['tournament']
             self._get_from_dict(t_data)
-
-            # view missing fields
-            # print([(k, v) for k, v in t_data.items() if k not in self._fields])
 
             if 'participants' in t_data:
                 self._refresh_participants_from_json(t_data['participants'])

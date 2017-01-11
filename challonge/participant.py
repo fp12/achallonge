@@ -11,7 +11,8 @@ class Participant(metaclass=FieldHolder):
                'removable', 'participatable_or_invitation_attached', 'confirm_remove',
                'invitation_pending', 'display_name_with_invitation_email_address',
                'email_hash', 'username', 'attached_participatable_portrait_url',
-               'can_check_in', 'checked_in', 'reactivatable']
+               'can_check_in', 'checked_in', 'reactivatable',
+               'display_name', 'group_player_ids']
 
     def __init__(self, connection, json_def, **kwargs):
         self.connection = connection
