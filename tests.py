@@ -182,10 +182,6 @@ class ATournamentsTestCase(unittest.TestCase):
         yield from t.remove_participant(p2)
         self.assertEqual(len(t.participants), 1)
 
-        p3 = yield from t.add_participant(email='fakeemail@prov.com', seed=1, misc='some info')
-        self.assertEqual(p3.misc, 'some info')
-        self.assertEqual(p3.seed, 1)
-
         for p in ps:
             if p.id == p1.id:
                 break
@@ -194,6 +190,10 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from t.add_participants('p3', 'p4')
         self.assertEqual(len(t.participants), 3)
+
+        p3 = yield from t.add_participant(display_name='fake', email='fakeemail@prov.com', seed=1, misc='some info')
+        self.assertEqual(p3.misc, 'some info')
+        self.assertEqual(p3.seed, 1)
 
         yield from self.user.destroy_tournament(t)
 
