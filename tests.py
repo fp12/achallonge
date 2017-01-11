@@ -70,8 +70,23 @@ class AAUserTestCase(unittest.TestCase):
     @async_test
     def test_b_get_tournaments(self):
         new_user = yield from challonge.get_user(username, api_key)
-        t = yield from new_user.get_tournaments()
-        self.assertIsInstance(t, list)
+        ts = yield from new_user.get_tournaments()
+        self.assertIsInstance(ts, list)
+
+        random_name = get_random_name()
+        t1 = yield from new_user.create_tournament(random_name, random_name)
+
+        t2 = yield from new_user.get_tournament(t1.id)
+        self.assertEqual(t1, t2)
+
+        t3 = yield from new_user.get_tournament(t1.id, force_update=True)
+        self.assertEqual(t1, t3)
+
+        fake_id = 0
+        t4 = yield from new_user.get_tournament(fake_id)
+        self.assertEqual(t4, None)
+
+        yield from new_user.destroy_tournament(t1)
 
 
 # @unittest.skip('')
@@ -84,14 +99,11 @@ class ATournamentsTestCase(unittest.TestCase):
     @async_test
     def test_a_create_destroy(self):
         random_name = get_random_name()
-        t = yield from self.user.create_tournament(random_name, random_name)
-        self.assertEqual(t.name, random_name)
-
-        t2 = yield from self.user.get_tournament(t.id)
-        self.assertEqual(t.id, t2.id)
+        t1 = yield from self.user.create_tournament(random_name, random_name)
+        self.assertEqual(t1.name, random_name)
 
         t_count = len(self.user.tournaments)
-        yield from self.user.destroy_tournament(t)
+        yield from self.user.destroy_tournament(t1)
         self.assertEqual(len(self.user.tournaments), t_count-1)
 
     # @unittest.skip('')
@@ -160,6 +172,9 @@ class ATournamentsTestCase(unittest.TestCase):
         p1_1 = yield from t.get_participant(p1.id, force_update=True)
         self.assertEqual(p1.id, p1_1.id)
         self.assertEqual(len(t.participants), 2)
+
+        p1_2 = yield from t.get_participant(0)
+        self.assertEqual(p1_2, None)
 
         ps = yield from t.get_participants(force_update=True)
         self.assertEqual(len(t.participants), 2)
@@ -459,8 +474,13 @@ class MatchesTestCase(unittest.TestCase):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
+
         p1 = yield from t.search_participant('p1')
         self.assertEqual(p1.name, 'p1')
+
+        p_fake = yield from t.search_participant('fake')
+        self.assertEqual(p_fake, None)
+
         yield from t.start()
         m = yield from t.get_matches()
         yield from m[0].report_winner(p1, '1-0')
@@ -497,7 +517,7 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.allow_attachments()
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
-        m = yield from t.get_matches()
+        m = yield from t.get_matches(force_update=True)
 
         a1 = yield from m[0].attach_url('https://github.com/fp12/achallonge')
         self.assertEqual(a1.url, 'https://github.com/fp12/achallonge')

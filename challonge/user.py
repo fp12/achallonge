@@ -21,6 +21,17 @@ class User:
             else:
                 self.tournaments.append(t)
 
+    def _refresh_tournament_from_json(self, tournament_data):
+        if self.tournaments is None:
+            self.tournaments = [self._create_tournament(tournament_data)]
+        else:
+            for t in self.tournaments:
+                if tournament_data['tournament']['id'] == t._id:
+                    t._refresh_from_json(tournament_data)
+                    break
+            else:
+                self.tournaments.append(self._create_tournament(tournament_data))
+
     def _create_tournament(self, json_def) -> Tournament:
         return Tournament(self.connection, json_def)
 
@@ -61,8 +72,9 @@ class User:
         found_t = self._find_tournament(t_id)
         if force_update or found_t is None:
             res = await self.connection('GET', 'tournaments/{}'.format(t_id))
-            found_t = self._create_tournament(res)
-            self._add_tournament(found_t)
+            self._refresh_tournament_from_json(res)
+            found_t = self._find_tournament(t_id)
+
         return found_t
 
     async def get_tournaments(self, force_update=False) -> list:
@@ -86,10 +98,13 @@ class User:
                 'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
             }
             res = await self.connection('GET', 'tournaments', **params)
-            self.tournaments = [self._create_tournament(t) for t in res]
-        if self.tournaments is not None:
-            return self.tournaments
-        return []
+            if len(res) == 0:
+                self.tournaments = []
+            else:
+                for t_data in res:
+                    self._refresh_tournament_from_json(t_data)
+
+        return self.tournaments
 
     async def create_tournament(self, name: str, url: str, tournament_type=TournamentType.single_elimination, **params) -> Tournament:
         """ creates a simple tournament with basic options
@@ -115,9 +130,8 @@ class User:
             'tournament_type': tournament_type.value,
         })
         res = await self.connection('POST', 'tournaments', 'tournament', **params)
-        new_t = self._create_tournament(res)
-        self._add_tournament(new_t)
-        return new_t
+        self._refresh_tournament_from_json(res)
+        return self._find_tournament(res['tournament']['id'])
 
     async def destroy_tournament(self, t: Tournament):
         """ completely removes a tournament from Challonge

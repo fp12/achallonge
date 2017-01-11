@@ -556,8 +556,8 @@ class Tournament(metaclass=FieldHolder):
         """
         found_p = self._find_participant(p_id)
         if force_update or found_p is None:
-            res = await self.connection('GET', 'tournaments/{}/participants/{}'.format(self._id, p_id))
-            found_p._refresh_from_json(res)
+            await self.get_participants()
+        found_p = self._find_participant(p_id)
         return found_p
 
     async def get_participants(self, force_update=False) -> list:
@@ -576,8 +576,7 @@ class Tournament(metaclass=FieldHolder):
 
         """
         if force_update or self.participants is None:
-            res = await self.connection('GET',
-                                        'tournaments/{}/participants'.format(self._id))
+            res = await self.connection('GET', 'tournaments/{}/participants'.format(self._id))
             self._refresh_participants_from_json(res)
         return self.participants or []
 
@@ -598,7 +597,7 @@ class Tournament(metaclass=FieldHolder):
 
         """
         if force_update or self.participants is None:
-            self.get_participants()
+            await self.get_participants()
         if self.participants is not None:
             for p in self.participants:
                 if p.name == name:
