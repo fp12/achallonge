@@ -517,7 +517,7 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.allow_attachments()
         yield from t.add_participants('p1', 'p2', 'p3', 'p4')
         yield from t.start()
-        m = yield from t.get_matches(force_update=True)
+        m = yield from t.get_matches()
 
         a1 = yield from m[0].attach_url('https://github.com/fp12/achallonge')
         self.assertEqual(a1.url, 'https://github.com/fp12/achallonge')
@@ -532,6 +532,10 @@ class AttachmentsTestCase(unittest.TestCase):
 
         yield from m[0].destroy_attachment(a2)
         self.assertEqual(len(m[0].attachments), 1)
+
+        m0 = yield from t.get_match(m[0].id, force_update=True)
+        self.assertEqual(m[0], m0)
+        self.assertEqual(len(m0.attachments), 1)
 
         yield from self.user.destroy_tournament(t)
 

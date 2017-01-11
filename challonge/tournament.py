@@ -91,6 +91,7 @@ class Tournament(metaclass=FieldHolder):
 
         self.matches = None
         self._create_match = lambda m: self._create_holder(Match, m)
+        self._find_match = lambda m_id: self._find_holder(self.matches, m_id)
 
         self._refresh_from_json(json_def)
 
@@ -557,7 +558,7 @@ class Tournament(metaclass=FieldHolder):
         found_p = self._find_participant(p_id)
         if force_update or found_p is None:
             await self.get_participants()
-        found_p = self._find_participant(p_id)
+            found_p = self._find_participant(p_id)
         return found_p
 
     async def get_participants(self, force_update=False) -> list:
@@ -680,6 +681,28 @@ class Tournament(metaclass=FieldHolder):
         if p in self.participants:
             self.participants.remove(p)
 
+    async def get_match(self, m_id, force_update=False) -> Match:
+        """ get a single match by id
+
+        |methcoro|
+
+        Args:
+            m_id: match id
+            force_update (default=False): True to force an update to the Challonge API
+
+        Returns:
+            Match
+
+        Raises:
+            APIException
+
+        """
+        found_m = self._find_match(m_id)
+        if force_update or found_m is None:
+            await self.get_matches()
+            found_m = self._find_match(m_id)
+        return found_m
+
     async def get_matches(self, force_update=False) -> list:
         """ get all matches (once the tournament is started)
 
@@ -696,10 +719,9 @@ class Tournament(metaclass=FieldHolder):
 
         """
         if force_update or self.matches is None:
-            params = {'include_attachments': 1}
             res = await self.connection('GET',
                                         'tournaments/{}/matches'.format(self._id),
-                                        **params)
+                                        include_attachments=1)
             self._refresh_matches_from_json(res)
         return self.matches or []
 
