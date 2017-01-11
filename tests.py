@@ -584,8 +584,14 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from t.start()
         m = yield from t.get_matches()
 
-        a = yield from m[0].attach_file('examples/listing.py', 'Simple example')
-        self.assertNotEqual(a.asset_url, None)
+        try:
+            a = yield from m[0].attach_file('examples/listing.py', 'Simple example')
+            self.assertNotEqual(a.asset_url, None)
+        except challonge.APIException:
+            pass
+
+        random_text = get_random_name()
+        a = yield from m[0].attach_text(random_text)
 
         random_text = get_random_name()
         yield from a.change_description(random_text)
