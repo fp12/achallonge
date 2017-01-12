@@ -58,6 +58,31 @@ class AAACleanup(unittest.TestCase):
 
 
 # @unittest.skip('')
+class SystemTestCase(unittest.TestCase):
+    @async_test
+    def setUp(self):
+        self.user = yield from challonge.get_user(username, api_key)
+
+    # @unittest.skip('')
+    @async_test
+    def test_a_raise(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+
+        with self.assertRaises(NameError):
+            yield from t.update(fake_argument=0)
+
+        challonge.CHALLONGE_USE_EXCEPTIONS = False
+
+        with self.assertLogs('challonge', level='WARN'):
+            yield from t.update(fake_argument=0)
+
+        challonge.CHALLONGE_USE_EXCEPTIONS = True
+
+        yield from self.user.destroy_tournament(t)
+
+
+# @unittest.skip('')
 class AAUserTestCase(unittest.TestCase):
     # @unittest.skip('')
     @async_test

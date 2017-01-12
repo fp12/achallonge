@@ -1,9 +1,11 @@
 import aiohttp
+import logging
 
-from . import CHALLONGE_USE_FIELDS_DESCRIPTORS, CHALLONGE_USE_EXCEPTIONS
+import challonge
 
 
 DEFAULT_TIMEOUT = 30
+log = logging.getLogger('challonge')
 
 
 class APIException(Exception):
@@ -11,12 +13,13 @@ class APIException(Exception):
     pass
 
 
-def assert_or_raise(cond, exc, msg: str = None):
+def assert_or_raise(cond, exc, *args):
     if not cond:
-        if CHALLONGE_USE_EXCEPTIONS:
-            raise exc(msg)
+        # print(challonge.CHALLONGE_USE_EXCEPTIONS)
+        if challonge.CHALLONGE_USE_EXCEPTIONS:
+            raise exc(*args)
         else:
-            print('a silent exception `{.__name__}` has been raised `{}`'.format(exc, msg))
+            log.warning('a silent exception `{}` has been raised `{}`'.format(exc.__name__, args))
 
 
 class FieldDescriptor:
@@ -43,7 +46,7 @@ class FieldHolder(type):
 
     def _get_from_dict(self, data):
         for a in self._fields:
-            name = FieldHolder.private_name.format(a) if CHALLONGE_USE_FIELDS_DESCRIPTORS else a
+            name = FieldHolder.private_name.format(a) if challonge.CHALLONGE_USE_FIELDS_DESCRIPTORS else a
             setattr(self, name, data[a] if a in data else None)
 
     def __init__(cls, name, bases, dct):
@@ -54,7 +57,7 @@ class FieldHolder(type):
         cls._get_from_dict = FieldHolder._get_from_dict
         cls.__eq__ = lambda self, other: self._id == other._id
 
-        if CHALLONGE_USE_FIELDS_DESCRIPTORS:
+        if challonge.CHALLONGE_USE_FIELDS_DESCRIPTORS:
             for a in cls._fields:
                 setattr(cls, a, FieldDescriptor(FieldHolder.private_name.format(a)))
 
@@ -88,12 +91,9 @@ class Connection:
                 auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
                 async with session.request(method, url, params=params, auth=auth) as response:
                     resp = await response.json()
-                    if response.status in [401, 404, 406, 422, 500]:
-                        raise APIException(uri, params, response.reason)
-                    if response.status != 200:
-                        raise ValueError
+                    assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, uri, params, response.reason)
+                    assert_or_raise(response.status == 200, ValueError, 'Unknown API return code', uri, params, response.reason)
                     return resp
-        return None
 
     @staticmethod
     def _prepare_params(params, prefix=None) -> dict:
