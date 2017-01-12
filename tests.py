@@ -608,6 +608,8 @@ class AttachmentsTestCase(unittest.TestCase):
     @unittest.expectedFailure
     @async_test
     def test_c_file(self):
+        challonge.USE_EXCEPTIONS = False
+
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
         yield from t.allow_attachments()
@@ -634,6 +636,7 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from self.user.destroy_tournament(t)
 
         print('well it worked...', end=' ')
+        challonge.USE_EXCEPTIONS = True
         self.fail('expected failure that sometimes work')
 
 
