@@ -69,6 +69,8 @@ class SystemTestCase(unittest.TestCase):
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
 
+        challonge.USE_EXCEPTIONS = True
+
         with self.assertRaises(NameError):
             yield from t.update(fake_argument=0)
 

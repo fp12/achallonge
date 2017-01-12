@@ -71,7 +71,7 @@ class Connection:
         self.loop = loop
 
     async def __call__(self, method: str, uri: str, params_prefix: str =None, **params):
-        """ responses codes:
+        """ response codes:
         200 - OK
         401 - Unauthorized (Invalid API key or insufficient permissions)
         404 - Object not found within your account scope
@@ -90,8 +90,8 @@ class Connection:
                 auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
                 async with session.request(method, url, params=params, auth=auth) as response:
                     resp = await response.json()
-                    assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, uri, params, response.reason)
-                    assert_or_raise(response.status == 200, ValueError, 'Unknown API return code', uri, params, response.reason)
+                    assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, response.status, response.reason, uri, params)
+                    assert_or_raise(response.status == 200, ValueError, 'Unknown API return code', response.status, response.reason, uri, params)
                     return resp
 
     @staticmethod
