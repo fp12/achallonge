@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from . import CHALLONGE_AUTO_GET_PARTICIPANTS, CHALLONGE_AUTO_GET_MATCHES
+from . import AUTO_GET_PARTICIPANTS, AUTO_GET_MATCHES
 from .helpers import FieldHolder, assert_or_raise
 from .participant import Participant
 from .match import Match
@@ -149,8 +149,8 @@ class Tournament(metaclass=FieldHolder):
 
         """
         params = {
-                'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_participants': 1 if AUTO_GET_PARTICIPANTS else 0,
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
         res = await self.connection('POST', 'tournaments/{}/start'.format(self._id), **params)
         self._refresh_from_json(res)
@@ -168,8 +168,8 @@ class Tournament(metaclass=FieldHolder):
 
         """
         params = {
-                'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_participants': 1 if AUTO_GET_PARTICIPANTS else 0,
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
         res = await self.connection('POST', 'tournaments/{}/reset'.format(self._id), **params)
         self._refresh_from_json(res)
@@ -187,8 +187,8 @@ class Tournament(metaclass=FieldHolder):
 
         """
         params = {
-                'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_participants': 1 if AUTO_GET_PARTICIPANTS else 0,
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
         res = await self.connection('POST', 'tournaments/{}/finalize'.format(self._id), **params)
         self._refresh_from_json(res)
@@ -746,7 +746,7 @@ class Tournament(metaclass=FieldHolder):
         """
         params = {
                 'include_participants': 1,  # forced to 1 since we need to update the Participant instances
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
         res = await self.connection('POST', 'tournaments/{}/process_check_ins'.format(self._id), **params)
         self._refresh_from_json(res)
@@ -770,7 +770,7 @@ class Tournament(metaclass=FieldHolder):
         """
         params = {
                 'include_participants': 1,  # forced to 1 since we need to update the Participant instances
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
         res = await self.connection('POST', 'tournaments/{}/abort_check_in'.format(self._id), **params)
         self._refresh_from_json(res)

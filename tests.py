@@ -72,12 +72,12 @@ class SystemTestCase(unittest.TestCase):
         with self.assertRaises(NameError):
             yield from t.update(fake_argument=0)
 
-        challonge.CHALLONGE_USE_EXCEPTIONS = False
+        challonge.USE_EXCEPTIONS = False
 
         with self.assertLogs('challonge', level='WARN'):
             yield from t.update(fake_argument=0)
 
-        challonge.CHALLONGE_USE_EXCEPTIONS = True
+        challonge.USE_EXCEPTIONS = True
 
         yield from self.user.destroy_tournament(t)
 
@@ -282,6 +282,8 @@ class ATournamentsTestCase(unittest.TestCase):
     @unittest.expectedFailure
     @async_test
     def test_f_checkin(self):
+        challonge.USE_EXCEPTIONS = False
+
         random_name = get_random_name()
         t = yield from self.user.create_tournament(random_name, random_name)
         p = yield from t.add_participant(username)
@@ -340,6 +342,8 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(t.state, 'pending')
 
         yield from self.user.destroy_tournament(t)
+
+        challonge.USE_EXCEPTIONS = True
 
         self.fail('expected failure that sometimes work')
 

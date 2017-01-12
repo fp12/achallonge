@@ -1,4 +1,4 @@
-from . import CHALLONGE_AUTO_GET_PARTICIPANTS, CHALLONGE_AUTO_GET_MATCHES
+from . import AUTO_GET_PARTICIPANTS, AUTO_GET_MATCHES
 from .helpers import get_connection
 from .tournament import Tournament, TournamentType
 
@@ -13,13 +13,6 @@ class User:
     def __init__(self, username: str, api_key: str, **kwargs):
         self.tournaments = None
         self.connection = get_connection(username, api_key, **kwargs)
-
-    def _add_tournament(self, t: Tournament):
-        if t is not None:
-            if self.tournaments is None:
-                self.tournaments = [t]
-            else:
-                self.tournaments.append(t)
 
     def _refresh_tournament_from_json(self, tournament_data):
         if self.tournaments is None:
@@ -94,8 +87,8 @@ class User:
         """
         if force_update or self.tournaments is None:
             params = {
-                'include_participants': 1 if CHALLONGE_AUTO_GET_PARTICIPANTS else 0,
-                'include_matches': 1 if CHALLONGE_AUTO_GET_MATCHES else 0
+                'include_participants': 1 if AUTO_GET_PARTICIPANTS else 0,
+                'include_matches': 1 if AUTO_GET_MATCHES else 0
             }
             res = await self.connection('GET', 'tournaments', **params)
             if len(res) == 0:

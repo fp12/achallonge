@@ -15,8 +15,7 @@ class APIException(Exception):
 
 def assert_or_raise(cond, exc, *args):
     if not cond:
-        # print(challonge.CHALLONGE_USE_EXCEPTIONS)
-        if challonge.CHALLONGE_USE_EXCEPTIONS:
+        if challonge.USE_EXCEPTIONS:
             raise exc(*args)
         else:
             log.warning('a silent exception `{}` has been raised `{}`'.format(exc.__name__, args))
@@ -46,7 +45,7 @@ class FieldHolder(type):
 
     def _get_from_dict(self, data):
         for a in self._fields:
-            name = FieldHolder.private_name.format(a) if challonge.CHALLONGE_USE_FIELDS_DESCRIPTORS else a
+            name = FieldHolder.private_name.format(a) if challonge.USE_FIELDS_DESCRIPTORS else a
             setattr(self, name, data[a] if a in data else None)
 
     def __init__(cls, name, bases, dct):
@@ -57,7 +56,7 @@ class FieldHolder(type):
         cls._get_from_dict = FieldHolder._get_from_dict
         cls.__eq__ = lambda self, other: self._id == other._id
 
-        if challonge.CHALLONGE_USE_FIELDS_DESCRIPTORS:
+        if challonge.USE_FIELDS_DESCRIPTORS:
             for a in cls._fields:
                 setattr(cls, a, FieldDescriptor(FieldHolder.private_name.format(a)))
 
