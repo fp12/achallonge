@@ -5,10 +5,7 @@ python:
 install: 
   - pip install -r requirements.txt
   - pip install coveralls
-  - pip install mypy
 script:
-  - mypy --fast-parser challonge
-  - mypy --fast-parser tests.py
   - coverage run --source=challonge tests.py -v
 after_success:
   - coveralls
