@@ -281,7 +281,7 @@ class ATournamentsTestCase(unittest.TestCase):
         self.assertEqual(len(t.participants), 4)
         yield from self.user.destroy_tournament(t)
 
-    @unittest.expectedFailure
+    # @unittest.expectedFailure
     @async_test
     def test_f_checkin(self):
         challonge.USE_EXCEPTIONS = False
@@ -300,8 +300,8 @@ class ATournamentsTestCase(unittest.TestCase):
                 yield from t.set_start_date(new_start_date.strftime('%Y/%m/%d'),
                                             new_start_date.strftime('%H:%M'),
                                             10)
-                self.assertNotEqual(t.start_at, None)
-                self.assertNotEqual(t.check_in_duration, None)
+                self.assertNotEqual(t.start_at, None, 'failed at t.set_start_date')
+                self.assertNotEqual(t.check_in_duration, None, 'failed at t.set_start_date')
             except challonge.APIException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
@@ -313,7 +313,7 @@ class ATournamentsTestCase(unittest.TestCase):
         while p.checked_in_at is None and total_time <= max_time:
             try:
                 yield from p.check_in()
-                self.assertNotEqual(p.checked_in_at, None)
+                self.assertNotEqual(p.checked_in_at, None, 'failed at p.check_in()')
             except challonge.APIException:
                 yield from asyncio.sleep(2.0)
                 total_time += 2.0
@@ -347,7 +347,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
         challonge.USE_EXCEPTIONS = True
 
-        self.fail('expected failure that sometimes work')
+        # self.fail('expected failure that sometimes work')
 
     # @unittest.skip('')
     @async_test
@@ -637,6 +637,7 @@ class AttachmentsTestCase(unittest.TestCase):
 
         print('well it worked...', end=' ')
         challonge.USE_EXCEPTIONS = True
+
         self.fail('expected failure that sometimes work')
 
 
