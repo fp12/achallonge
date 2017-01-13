@@ -497,7 +497,7 @@ class MatchesTestCase(unittest.TestCase):
         yield from t.start()
         self.assertEqual(t.state, 'underway', random_name)
 
-        m = yield from t.get_matches(force_update=True)
+        m = yield from t.get_matches()
         self.assertGreater(len(m), 0, random_name)
 
         yield from m[0].report_live_scores('1-0')
@@ -600,6 +600,9 @@ class AttachmentsTestCase(unittest.TestCase):
         yield from a.change_text(random_text)
         self.assertEqual(a.description, random_text)
 
+        m = yield from t.get_matches(force_update=True)
+        self.assertEqual(len(m[0].attachments), 1)
+
         yield from m[0].destroy_attachment(a)
         self.assertEqual(len(m[0].attachments), 0)
 
@@ -635,7 +638,30 @@ class AttachmentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
-        print('well it worked...', end=' ')
+        challonge.USE_EXCEPTIONS = True
+
+        self.fail('expected failure that sometimes work')
+
+    @unittest.expectedFailure
+    @async_test
+    def test_d_file(self):
+        challonge.USE_EXCEPTIONS = False
+
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.allow_attachments()
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
+        yield from t.start()
+        m = yield from t.get_matches()
+
+        random_text = get_random_name()
+        a = yield from m[0].attach_text(random_text)
+
+        yield from a.change_file('examples/create.py')
+        self.assertNotEqual(a.asset_url, None)
+
+        yield from self.user.destroy_tournament(t)
+
         challonge.USE_EXCEPTIONS = True
 
         self.fail('expected failure that sometimes work')

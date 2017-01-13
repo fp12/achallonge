@@ -22,7 +22,7 @@ Features
 Getting Started
 ---------------
 
-Simple example::
+Simple example:
 
 .. literalinclude:: ../examples/listing.py
 

@@ -14,11 +14,11 @@ class APIException(Exception):
 
 
 def assert_or_raise(cond, exc, *args):
-    if not cond:
+    if challonge.USE_EXCEPTIONS is not None and not cond:
         if challonge.USE_EXCEPTIONS:
             raise exc(*args)
         else:
-            log.warning('a silent exception `{}` has been raised `{}`'.format(exc.__name__, args))
+            log.warning('An exception `{}` has been raised: `{}`'.format(exc.__name__, args))
 
 
 class FieldDescriptor:
@@ -90,8 +90,8 @@ class Connection:
                 auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
                 async with session.request(method, url, params=params, auth=auth) as response:
                     resp = await response.json()
+                    assert_or_raise(response.status in [200, 401, 404, 406, 422, 500], ValueError, 'Unknown API return code', response.status, response.reason, uri, params)
                     assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, response.status, response.reason, uri, params)
-                    assert_or_raise(response.status == 200, ValueError, 'Unknown API return code', response.status, response.reason, uri, params)
                     return resp
 
     @staticmethod
