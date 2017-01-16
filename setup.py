@@ -17,9 +17,9 @@ with open('README.md') as f:
 
 
 setup(name='achallonge',
-      author='fp12',
+      author='Fabien Poupineau (fp12)',
       url='https://github.com/fp12/achallonge',
-      version='0.5.0',
+      version='1.0.0',
       packages=find_packages(),
       license='MIT',
       description='A python library to use the Challonge API',
@@ -27,7 +27,7 @@ setup(name='achallonge',
       include_package_data=True,
       install_requires=requirements,
       classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
         'Natural Language :: English',
@@ -38,5 +38,6 @@ setup(name='achallonge',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities',
-      ]
+      ],
+      keywords='challonge tournament match',
       )

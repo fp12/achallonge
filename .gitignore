@@ -1,6 +1,10 @@
 venv/
 htmlcov/
+build/
+dist/
+achallonge.egg-info/
 *.pyc
 .secrets
 docs/_build
 .coverage
+.pypirc

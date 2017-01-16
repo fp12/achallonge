@@ -23,7 +23,7 @@ Modern library that is more than just a wrapper for the Challonge web API
 
 # Installation
 
-    pip install -e git+http://github.com/fp12/achallonge#egg=achallonge
+    pip install achallonge
     
 # Usage
 
