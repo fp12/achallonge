@@ -552,12 +552,28 @@ class MatchesTestCase(unittest.TestCase):
         t = yield from self.user.create_tournament(random_name, random_name)
         p1 = yield from t.add_participant('p1')
         p2 = yield from t.add_participant('p2')
+        yield from t.add_participant('p3')
+        p4 = yield from t.add_participant('p4')
         yield from t.start()
-        m = yield from p1.get_next_match()
-        self.assertIn(m, t.matches)
 
-        p2_ref = yield from p1.get_next_opponent()
-        self.assertIs(p2, p2_ref)
+        m1 = yield from p1.get_next_match()
+        self.assertIsNotNone(m1)
+
+        p4_ref = yield from p1.get_next_opponent()
+        self.assertIs(p4, p4_ref)
+
+        yield from m1.report_winner(p1, '1-0')
+
+        m2 = yield from p1.get_next_match()
+        self.assertIsNotNone(m2)
+        self.assertEqual(m2.state, 'pending')
+        self.assertIsNone(m2.player2_id)
+
+        m3 = yield from p2.get_next_match()
+        yield from m3.report_winner(p2, '1-0')
+
+        m2 = yield from p1.get_next_match()
+        self.assertEqual(m2.player2_id, p2.id)
 
         yield from self.user.destroy_tournament(t)
 
