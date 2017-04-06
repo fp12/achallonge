@@ -32,7 +32,7 @@ username, api_key = get_credentials()
 
 
 def get_random_name():
-    return "pychallonge_" + "".join(random.choice(string.ascii_lowercase) for _ in range(0, 15))
+    return "achallonge_" + "".join(random.choice(string.ascii_lowercase) for _ in range(0, 15))
 
 
 def async_test(f):
@@ -359,7 +359,7 @@ class ATournamentsTestCase(unittest.TestCase):
 
         t1_ref = yield from self.user.get_tournament(t1.id)
         self.assertEqual(t1, t1_ref)
-        self.assertTrue(t1 is t1_ref)
+        self.assertIs(t1, t1_ref)
         self.assertNotEqual(t1, t2)
 
         yield from self.user.destroy_tournament(t1)
@@ -543,6 +543,22 @@ class MatchesTestCase(unittest.TestCase):
         yield from m[0].change_votes(player1_votes=1, player2_votes=5, add=True)
         self.assertEqual(m[0].player1_votes, 4)
         self.assertEqual(m[0].player2_votes, 5)
+        yield from self.user.destroy_tournament(t)
+
+    # @unittest.skip('')
+    @async_test
+    def test_d_next_match_and_opponent(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        p1 = yield from t.add_participant('p1')
+        p2 = yield from t.add_participant('p2')
+        yield from t.start()
+        m = yield from p1.get_next_match()
+        self.assertIn(m, t.matches)
+
+        p2_ref = yield from p1.get_next_opponent()
+        self.assertIs(p2, p2_ref)
+
         yield from self.user.destroy_tournament(t)
 
 

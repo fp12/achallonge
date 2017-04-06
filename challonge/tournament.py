@@ -86,7 +86,7 @@ class Tournament(metaclass=FieldHolder):
         self.connection = connection
 
         self.participants = None
-        self._create_participant = lambda p: self._create_holder(Participant, p)
+        self._create_participant = lambda p: self._create_holder(Participant, p, tournament=self)
         self._find_participant = lambda p_id: self._find_holder(self.participants, p_id)
 
         self.matches = None

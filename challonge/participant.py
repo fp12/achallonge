@@ -14,8 +14,9 @@ class Participant(metaclass=FieldHolder):
                'can_check_in', 'checked_in', 'reactivatable',
                'display_name', 'group_player_ids']
 
-    def __init__(self, connection, json_def, **kwargs):
+    def __init__(self, connection, json_def, tournament, **kwargs):
         self.connection = connection
+        self._tournament = tournament
         self._refresh_from_json(json_def)
 
     def _refresh_from_json(self, json_def):
@@ -47,7 +48,7 @@ class Participant(metaclass=FieldHolder):
         await self._change(name=new_name)
 
     async def change_username(self, username: str):
-        """ will invite the Challonge user to the tournament
+        """ Will invite the Challonge user to the tournament
 
         |methcoro|
 
@@ -61,7 +62,7 @@ class Participant(metaclass=FieldHolder):
         await self._change(challonge_username=username)
 
     async def change_email(self, email: str):
-        """  set / update the email associated to the participant
+        """  Set / update the email associated to the participant
 
         |methcoro|
 
@@ -79,7 +80,7 @@ class Participant(metaclass=FieldHolder):
         await self._change(email=email)
 
     async def change_seed(self, new_seed: int) -> int:
-        """
+        """ Change the seed of the participant
 
         |methcoro|
 
@@ -99,7 +100,8 @@ class Participant(metaclass=FieldHolder):
         await self._change(seed=new_seed)
 
     async def change_misc(self, misc: str) -> str:
-        """
+        """ Change the `misc` field
+
         |methcoro|
 
         Note:
@@ -115,7 +117,7 @@ class Participant(metaclass=FieldHolder):
         await self._change(misc=misc)
 
     async def check_in(self):
-        """
+        """ Checks this participant in
 
         |methcoro|
 
@@ -130,7 +132,8 @@ class Participant(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def undo_check_in(self):
-        """
+        """ Undo the check in for this participant
+
         |methcoro|
 
         Warning:
@@ -142,3 +145,46 @@ class Participant(metaclass=FieldHolder):
         """
         res = await self.connection('POST', 'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id))
         self._refresh_from_json(res)
+
+    async def get_next_match(self):
+        """ Return the first open match found, or if none, the first pending match found
+
+        |methcoro|
+
+        Raises:
+            APIException
+
+        """
+        if self._final_rank is not None:
+            return None
+
+        open_matches = await self.connection('GET',
+                                             'tournaments/{}/matches'.format(self._tournament_id),
+                                             state='open',
+                                             participant_id=self._id)
+        if len(open_matches) > 0:
+            return await self._tournament.get_match(open_matches[0]['match']['id'])
+
+        pending_matches = await self.connection('GET',
+                                                'tournaments/{}/matches'.format(self._tournament_id),
+                                                state='pending',
+                                                participant_id=self._id)
+        if len(pending_matches) > 0:
+            return await self._tournament.get_match(pending_matches[0]['match']['id'])
+
+        return None
+
+    async def get_next_opponent(self):
+        """ Get the opponent of the potential next match. See :func:`get_next_match`
+
+        |methcoro|
+
+        Raises:
+            APIException
+
+        """
+        next_match = await self.get_next_match()
+        if next_match is not None:
+            opponent_id = next_match.player1_id if next_match.player2_id == self._id else next_match.player2_id
+            return await self._tournament.get_participant(opponent_id)
+        return None
