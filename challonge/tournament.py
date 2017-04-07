@@ -90,7 +90,7 @@ class Tournament(metaclass=FieldHolder):
         self._find_participant = lambda p_id: self._find_holder(self.participants, p_id)
 
         self.matches = None
-        self._create_match = lambda m: self._create_holder(Match, m)
+        self._create_match = lambda m: self._create_holder(Match, m, tournament=self)
         self._find_match = lambda m_id: self._find_holder(self.matches, m_id)
 
         self._refresh_from_json(json_def)

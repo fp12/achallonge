@@ -572,8 +572,14 @@ class MatchesTestCase(unittest.TestCase):
         m3 = yield from p2.get_next_match()
         yield from m3.report_winner(p2, '1-0')
 
-        m2 = yield from p1.get_next_match()
         self.assertEqual(m2.player2_id, p2.id)
+        yield from m2.report_winner(p1, '1-0')
+
+        m0 = yield from p1.get_next_match()
+        self.assertIsNone(m0)
+
+        p0_ref = yield from p1.get_next_opponent()
+        self.assertIsNone(p0_ref)
 
         yield from self.user.destroy_tournament(t)
 

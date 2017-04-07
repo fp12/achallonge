@@ -1,4 +1,5 @@
 from .helpers import FieldHolder
+from .enums import MatchState
 
 
 class Participant(metaclass=FieldHolder):
@@ -146,6 +147,24 @@ class Participant(metaclass=FieldHolder):
         res = await self.connection('POST', 'tournaments/{}/participants/{}/undo_check_in'.format(self._tournament_id, self._id))
         self._refresh_from_json(res)
 
+    async def get_matches(self, state: MatchState = MatchState.all_):
+        """ Return the matches of the given state
+
+        |methcoro|
+
+        Args:
+            state: see :class:`MatchState`
+
+        Raises:
+            APIException
+
+        """
+        matches = await self.connection('GET',
+                                        'tournaments/{}/matches'.format(self._tournament_id),
+                                        state=state.value,
+                                        participant_id=self._id)
+        return [await self._tournament.get_match(m['match']['id']) for m in matches]
+
     async def get_next_match(self):
         """ Return the first open match found, or if none, the first pending match found
 
@@ -158,19 +177,13 @@ class Participant(metaclass=FieldHolder):
         if self._final_rank is not None:
             return None
 
-        open_matches = await self.connection('GET',
-                                             'tournaments/{}/matches'.format(self._tournament_id),
-                                             state='open',
-                                             participant_id=self._id)
-        if len(open_matches) > 0:
-            return await self._tournament.get_match(open_matches[0]['match']['id'])
+        matches = await self.get_matches(MatchState.open_)
 
-        pending_matches = await self.connection('GET',
-                                                'tournaments/{}/matches'.format(self._tournament_id),
-                                                state='pending',
-                                                participant_id=self._id)
-        if len(pending_matches) > 0:
-            return await self._tournament.get_match(pending_matches[0]['match']['id'])
+        if len(matches) == 0:
+            matches = await self.get_matches(MatchState.pending)
+
+        if len(matches) > 0:
+            return matches[0]
 
         return None
 

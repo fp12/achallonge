@@ -23,8 +23,9 @@ class Match(metaclass=FieldHolder):
                'winner_id', 'prerequisite_match_ids_csv', 'scores_csv',
                'optional', 'rushb_id', 'completed_at', 'suggested_play_order']
 
-    def __init__(self, connection, json_def, **kwargs):
+    def __init__(self, connection, json_def, tournament, **kwargs):
         self.connection = connection
+        self._tournament = tournament
 
         self.attachments = None
         self._create_attachment = lambda a, **kwargs: self._create_holder(Attachment, a, **kwargs)
@@ -66,6 +67,8 @@ class Match(metaclass=FieldHolder):
                                     'match',
                                     **params)
         self._refresh_from_json(res)
+        # now we need to refresh all the matches of the tournament
+        await self._tournament.get_matches(force_update=True)
 
     async def report_live_scores(self, scores_csv: str):
         """ report scores without giving a winner yet
