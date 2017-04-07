@@ -57,17 +57,6 @@ Participant
 Match
 -----
 
-.. class:: MatchState
-	
-	.. attribute:: all_
-
-	.. attribute:: open_
-	
-	.. attribute:: pending
-	
-	.. attribute:: complete
-
-
 .. autoclass:: challonge.Match
     :members:
     :member-order: bysource
