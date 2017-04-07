@@ -30,18 +30,18 @@ Modern library that is more than just a wrapper for the Challonge web API
 ```python
 import challonge
 
-async def pychallonge_async()
+async def foo()
     # Log in into Challonge with your [CHALLONGE! API credentials](https://challonge.com/settings/developer).
-    user = challonge.get_user('your_challonge_username', 'your_api_key')
+    user = await challonge.get_user('your_challonge_username', 'your_api_key')
 
     # Retrieve your tournaments
     tournaments = await user.get_tournaments()
 
     # Tournaments, matches, and participants are all represented as Python classes
     for t in tournaments:
-		print(t.id)  # 3272
-		print(t.name)  # 'My Awesome Tournament'
-		print(t.status)  # 'open'
+        print(t.id)  # 3272
+        print(t.name)  # 'My Awesome Tournament'
+        print(t.status)  # 'open'
 
     # Retrieve the participants for a given tournament.
     participants = await tournaments[0].get_participants()
