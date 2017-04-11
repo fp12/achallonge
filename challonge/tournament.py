@@ -1,48 +1,11 @@
 from datetime import datetime
-from enum import Enum
+from collections import OrderedDict
 
 from . import AUTO_GET_PARTICIPANTS, AUTO_GET_MATCHES
 from .helpers import FieldHolder, assert_or_raise
 from .participant import Participant
 from .match import Match
-
-
-class TournamentType(Enum):
-    single_elimination = 'single elimination'
-    double_elimination = 'double elimination'
-    round_robin = 'round robin'
-    swiss = 'swiss'
-
-
-class TournamentState(Enum):
-    pending = 0
-    open = 1
-    complete = 2
-    in_progress = 3
-
-
-class TournamentStateResult(Enum):
-    underway = 0
-    pending = 1
-
-
-class DoubleEliminationEnding(Enum):
-    default = None
-    single_match = 'single_match'
-    no_grand_finals = 'skip'
-
-
-class RankingOrder(Enum):
-    match_wins = 'match wins'
-    game_wins = 'game wins'
-    points_scored = 'points scored'
-    points_difference = 'points difference'
-    custom = 'custom'
-
-
-class Pairing(Enum):
-    seeds = 0
-    sequential = 1
+from .enums import TournamentType, TournamentState, Pairing, DoubleEliminationEnding, RankingOrder
 
 
 class Tournament(metaclass=FieldHolder):
@@ -774,3 +737,25 @@ class Tournament(metaclass=FieldHolder):
             }
         res = await self.connection('POST', 'tournaments/{}/abort_check_in'.format(self._id), **params)
         self._refresh_from_json(res)
+
+    async def get_final_ranking(self) -> OrderedDict:
+        """ Get the ordered players ranking
+
+        Returns:
+            collections.OrderedDict[rank, List[Participant]]:
+
+        Raises:
+            APIException
+
+        """
+        if self._state != TournamentState.complete.value:
+            return None
+
+        ranking = {}
+        for p in self.participants:
+            if p.final_rank in ranking:
+                ranking[p.final_rank].append(p)
+            else:
+                ranking[p.final_rank] = [p]
+
+        return OrderedDict(sorted(ranking.items(), key=lambda t: t[0]))

@@ -481,6 +481,26 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_m_get_ranking(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        rankings = yield from t.get_final_ranking()
+        self.assertIsNone(rankings)
+
+        p1 = yield from t.add_participant('p1')
+        p2 = yield from t.add_participant('p2')
+        yield from t.start()
+        yield from t.matches[0].report_winner(p1, '1-0')
+        yield from t.finalize()
+
+        rankings = yield from t.get_final_ranking()
+        self.assertIn(p1, rankings[1])
+        self.assertIn(p2, rankings[2])
+
+        yield from self.user.destroy_tournament(t)
+
 
 # @unittest.skip('')
 class MatchesTestCase(unittest.TestCase):
