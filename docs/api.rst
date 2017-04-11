@@ -17,6 +17,38 @@ User
 Tournament
 ----------
 
+.. autoclass:: challonge.Tournament
+    :members:
+    :member-order: bysource
+
+
+Participant
+-----------
+
+.. autoclass:: challonge.Participant
+    :members:
+    :member-order: bysource
+
+
+Match
+-----
+
+.. autoclass:: challonge.Match
+    :members:
+    :member-order: bysource
+
+
+Attachment
+----------
+
+.. autoclass:: challonge.Attachment
+    :members:
+    :member-order: bysource
+
+
+Enums
+-----
+
 .. class:: TournamentType
 	
 	.. attribute:: double_elimination
@@ -39,23 +71,7 @@ Tournament
 	.. attribute:: no_grand_finals
 
 		don't create a finals match between winners and losers bracket finalists.
-	
 
-.. autoclass:: challonge.Tournament
-    :members:
-    :member-order: bysource
-
-
-Participant
------------
-
-.. autoclass:: challonge.Participant
-    :members:
-    :member-order: bysource
-
-
-Match
------
 
 .. class:: MatchState
 	
@@ -68,18 +84,9 @@ Match
 	.. attribute:: complete
 
 
-.. autoclass:: challonge.Match
+.. autoclass:: challonge.TournamentStateResult
     :members:
-    :member-order: bysource
-
-
-Attachment
-----------
-
-.. autoclass:: challonge.Attachment
-    :members:
-    :member-order: bysource
-
+    
 
 Exceptions
 ----------

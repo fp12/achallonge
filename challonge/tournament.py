@@ -436,12 +436,12 @@ class Tournament(metaclass=FieldHolder):
         await self.update(signup_cap=max_participants)
 
     async def set_private(self, private: bool = True):
-        """
+        """ Hide this tournament from the public browsable index and your profile
 
         |methcoro|
 
         Args:
-            private: Hide this tournament from the public browsable index and your profile
+            private:
 
         Raises:
             APIException
@@ -455,7 +455,7 @@ class Tournament(metaclass=FieldHolder):
         |methcoro|
 
         Args:
-            order
+            order: see :class:`RankingOrder`
 
         Raises:
             APIException

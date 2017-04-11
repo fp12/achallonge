@@ -11,8 +11,8 @@ USE_EXCEPTIONS = True
 
 from .helpers import APIException
 from .user import User, get_user
-from .tournament import Tournament, TournamentType, DoubleEliminationEnding, RankingOrder, Pairing
+from .tournament import Tournament
 from .participant import Participant
 from .match import Match
 from .attachment import Attachment
-from .enums import TournamentState, MatchState
+from .enums import TournamentState, TournamentType, TournamentStateResult, DoubleEliminationEnding, RankingOrder, Pairing, MatchState
