@@ -4,7 +4,7 @@ from enum import Enum
 class TournamentState(Enum):
     """ State a tournament can be in """
     pending = 'pending'
-    open_ = 'open'  # # can't use `open`
+    open_ = 'open'  #: can't use `open`
     complete = 'complete'
     in_progress = 'in progress'
 
@@ -27,9 +27,9 @@ class TournamentStateResult(Enum):
 
 class DoubleEliminationEnding(Enum):
     """ Type of ending for double elimination tournaments """
-    default = None  # give the winners bracket finalist two chances to beat the losers bracket finalist.
-    single_match = 'single_match'  # create only one grand finals match.
-    no_grand_finals = 'skip'  # don't create a finals match between winners and losers bracket finalists.
+    default = None  #: give the winners bracket finalist two chances to beat the losers bracket finalist
+    single_match = 'single_match'  #: create only one grand finals match
+    no_grand_finals = 'skip'  #: don't create a finals match between winners and losers bracket finalists
 
 
 class RankingOrder(Enum):
@@ -49,7 +49,7 @@ class Pairing(Enum):
 
 class MatchState(Enum):
     """ State a match can be in """
-    all_ = 'all'  # can't use `all`
-    open_ = 'open'  # can't use `open`
+    all_ = 'all'  #: can't use `all`
+    open_ = 'open'  #: can't use `open`
     pending = 'pending'
     complete = 'complete'
