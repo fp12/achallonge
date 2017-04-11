@@ -49,44 +49,40 @@ Attachment
 Enums
 -----
 
-.. class:: TournamentType
-	
-	.. attribute:: double_elimination
-	
-	.. attribute:: single_elimination
-	
-	.. attribute:: round_robin
-	
-	.. attribute:: swiss 
+.. autoclass:: challonge.TournamentState
+    :members:
+    :undoc-members:
 
 
-.. class:: DoubleEliminationEnding
-
-	.. attribute:: default
-
-		give the winners bracket finalist two chances to beat the losers bracket finalist.
-	.. attribute:: single_match
-
-		create only one grand finals match.
-	.. attribute:: no_grand_finals
-
-		don't create a finals match between winners and losers bracket finalists.
-
-
-.. class:: MatchState
-	
-	.. attribute:: all_
-
-	.. attribute:: open_
-	
-	.. attribute:: pending
-	
-	.. attribute:: complete
+.. autoclass:: challonge.TournamentType
+    :members:
+    :undoc-members:
 
 
 .. autoclass:: challonge.TournamentStateResult
     :members:
-    
+    :undoc-members:
+
+
+.. autoclass:: challonge.DoubleEliminationEnding
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: challonge.RankingOrder
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: challonge.Pairing
+    :members:
+    :undoc-members:
+
+
+.. autoclass:: challonge.MatchState
+    :members:
+    :undoc-members:
+
 
 Exceptions
 ----------

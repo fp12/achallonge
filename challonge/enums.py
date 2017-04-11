@@ -27,9 +27,9 @@ class TournamentStateResult(Enum):
 
 class DoubleEliminationEnding(Enum):
     """ Type of ending for double elimination tournaments """
-    default = None
-    single_match = 'single_match'
-    no_grand_finals = 'skip'
+    default = None  # give the winners bracket finalist two chances to beat the losers bracket finalist.
+    single_match = 'single_match'  # create only one grand finals match.
+    no_grand_finals = 'skip'  # don't create a finals match between winners and losers bracket finalists.
 
 
 class RankingOrder(Enum):
