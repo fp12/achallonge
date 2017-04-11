@@ -39,5 +39,5 @@ setup(name='achallonge',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities',
       ],
-      keywords='challonge tournament match',
+      keywords=['challonge',  'tournament', 'match'],
       )
