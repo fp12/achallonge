@@ -3,7 +3,7 @@ from .enums import MatchState
 
 
 class Participant(metaclass=FieldHolder):
-    """ representation of a Challonge participant """
+    """ Representation of a Challonge participant """
 
     _fields = ['active', 'checked_in_at', 'created_at', 'final_rank',
                'group_id', 'icon', 'id', 'invitation_id', 'invite_email',

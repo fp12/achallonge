@@ -9,7 +9,7 @@ from .enums import TournamentType, TournamentState, Pairing, DoubleEliminationEn
 
 
 class Tournament(metaclass=FieldHolder):
-    """ representation of a Challonge tournament """
+    """ Representation of a Challonge tournament """
 
     _fields = ['accept_attachments', 'allow_participant_match_reporting',
                'anonymous_voting', 'category', 'check_in_duration',
@@ -715,7 +715,7 @@ class Tournament(metaclass=FieldHolder):
         self._refresh_from_json(res)
 
     async def abort_check_in(self):
-        """ abort the check in process
+        """ Abort the check in process
 
         |methcoro|
 

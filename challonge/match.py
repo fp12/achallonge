@@ -11,7 +11,7 @@ def verify_score_format(csv_score):
 
 
 class Match(metaclass=FieldHolder):
-    """ representation of a Challonge match """
+    """ Representation of a Challonge match """
 
     _fields = ['attachment_count', 'created_at', 'group_id', 'has_attachment',
                'id', 'identifier', 'location', 'loser_id', 'player1_id',

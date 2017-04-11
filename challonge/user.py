@@ -4,7 +4,7 @@ from .tournament import Tournament, TournamentType
 
 
 class User:
-    """ representation of a Challonge user
+    """ Representation of a Challonge user
 
     Main entry point for using the async challonge library.
 
