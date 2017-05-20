@@ -29,6 +29,7 @@ def get_credentials():
 
 
 username, api_key = get_credentials()
+organization = 'achallonge-testing1'
 
 
 def get_random_name():
@@ -53,7 +54,7 @@ class AAACleanup(unittest.TestCase):
         user = yield from challonge.get_user(username, api_key)
         tournaments = yield from user.get_tournaments()
         for t in tournaments[:]:
-            if t.name.startswith('pychallonge'):
+            if t.name.startswith('achallonge'):
                 yield from user.destroy_tournament(t)
 
 
@@ -100,6 +101,9 @@ class AAUserTestCase(unittest.TestCase):
         ts = yield from new_user.get_tournaments()
         self.assertIsInstance(ts, list)
 
+        ts = yield from new_user.get_tournaments(subdomain=organization)
+        self.assertIsInstance(ts, list)
+
         random_name = get_random_name()
         t1 = yield from new_user.create_tournament(random_name, random_name)
 
@@ -109,9 +113,8 @@ class AAUserTestCase(unittest.TestCase):
         t3 = yield from new_user.get_tournament(t1.id, force_update=True)
         self.assertEqual(t1, t3)
 
-        fake_id = 0
-        t4 = yield from new_user.get_tournament(fake_id)
-        self.assertEqual(t4, None)
+        with self.assertRaises(challonge.APIException):
+            yield from new_user.get_tournament(-1)
 
         yield from new_user.destroy_tournament(t1)
 
