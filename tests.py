@@ -107,16 +107,27 @@ class AAUserTestCase(unittest.TestCase):
         random_name = get_random_name()
         t1 = yield from new_user.create_tournament(random_name, random_name)
 
-        t2 = yield from new_user.get_tournament(t1.id)
-        self.assertEqual(t1, t2)
+        t1_by_id = yield from new_user.get_tournament(t1.id)
+        self.assertEqual(t1, t1_by_id)
 
-        t3 = yield from new_user.get_tournament(t1.id, force_update=True)
-        self.assertEqual(t1, t3)
+        t1_by_url = yield from new_user.get_tournament(url=t1.url)
+        self.assertEqual(t1, t1_by_url)
+
+        t1_forced = yield from new_user.get_tournament(t1.id, force_update=True)
+        self.assertEqual(t1, t1_forced)
+
+        random_name = get_random_name()
+        t2 = yield from new_user.create_tournament(random_name, random_name, subdomain=organization)
+        self.assertEqual(t2.subdomain, organization)
+
+        t2_by_url = yield from new_user.get_tournament(url=t2.url, subdomain=organization)
+        self.assertEqual(t2, t2_by_url)
 
         with self.assertRaises(challonge.APIException):
             yield from new_user.get_tournament(-1)
 
         yield from new_user.destroy_tournament(t1)
+        yield from new_user.destroy_tournament(t2)
 
 
 # @unittest.skip('')
