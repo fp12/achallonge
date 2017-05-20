@@ -19,7 +19,7 @@ with open('README.md') as f:
 setup(name='achallonge',
       author='Fabien Poupineau (fp12)',
       url='https://github.com/fp12/achallonge',
-      version='1.2.0',
+      version='1.3.0',
       packages=find_packages(),
       license='MIT',
       description='A python library to use the Challonge API',
