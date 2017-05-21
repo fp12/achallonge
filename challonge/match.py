@@ -115,6 +115,18 @@ class Match(metaclass=FieldHolder):
         """
         await self._report(scores_csv, 'tie')
 
+    async def reopen(self):
+        """ Reopens a match that was marked completed, automatically resetting matches that follow it
+
+        |methcoro|
+
+        Raises:
+            APIException
+
+        """
+        res = await self.connection('POST', 'tournaments/{}/matches/{}/reopen'.format(self._tournament_id, self._id))
+        self._refresh_from_json(res)
+
     async def change_votes(self, player1_votes: int = None, player2_votes: int = None, add: bool = False):
         """ change the votes for either player
 

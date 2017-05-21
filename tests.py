@@ -617,6 +617,25 @@ class MatchesTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_e_reopen(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.add_participants('p1', 'p2', 'p3', 'p4')
+        yield from t.start()
+
+        m = yield from t.get_matches()
+        p1 = yield from t.search_participant('p1')
+        self.assertEqual(m[0].state, 'pending')
+
+        yield from m[0].report_winner(p1, '1-0')
+        self.assertEqual(m[0].state, 'complete')
+
+        yield from m[0].reopen()
+        self.assertEqual(m[0].state, 'open')
+        yield from self.user.destroy_tournament(t)
+
 
 # @unittest.skip('')
 class AttachmentsTestCase(unittest.TestCase):
