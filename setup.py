@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import re
 import os
 
 
@@ -15,11 +16,14 @@ readme = ''
 with open('README.md') as f:
     readme = f.read()
 
+version = ''
+with open('challonge/__init__.py') as f:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setup(name='achallonge',
       author='Fabien Poupineau (fp12)',
       url='https://github.com/fp12/achallonge',
-      version='1.3.0',
+      version=version,
       packages=find_packages(),
       license='MIT',
       description='A python library to use the Challonge API',
