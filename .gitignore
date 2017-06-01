@@ -8,3 +8,6 @@ achallonge.egg-info/
 docs/_build
 .coverage
 .pypirc
+*.suo
+*.sln
+*.pyproj
