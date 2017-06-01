@@ -44,4 +44,7 @@ setup(name='achallonge',
         'Topic :: Utilities',
       ],
       keywords=['challonge',  'tournament', 'match'],
+      extras_require = {
+        'speed':  ['cchardet', 'aiodns']
+    }
       )
