@@ -13,8 +13,10 @@ Modern library that is more than just a wrapper for the Challonge web API
 # Requirements
 
 * `aiohttp`
-    * `cchardet` faster replacement for chardet, as mentionned on the aiohttp page
-    * `aiodns` for speeding up DNS resolving, highly recommended by aiohttp
+
+Optional:
+ * `cchardet` faster replacement for chardet, as mentionned on the aiohttp page
+ * `aiodns` for speeding up DNS resolving, highly recommended by aiohttp
 
 # Python version support
 
@@ -25,13 +27,17 @@ Modern library that is more than just a wrapper for the Challonge web API
 
     pip install achallonge
     
+If you want to have the optional dependencies for aiohttp, you can:
+
+    pip install achallonge[speed]
+    
 # Usage
 
 ```python
 import challonge
 
 async def foo()
-    # Log in into Challonge with your [CHALLONGE! API credentials](https://challonge.com/settings/developer).
+    # Log in into Challonge with your CHALLONGE! API credentials (https://challonge.com/settings/developer).
     user = await challonge.get_user('your_challonge_username', 'your_api_key')
 
     # Retrieve your tournaments
@@ -57,5 +63,7 @@ The full documentation can be found on [Read the docs](http://achallonge.readthe
 Distributed under MIT license. See `LICENSE` for details
 
 Fabien Poupineau (fp12) - 2017
+
 Twitter: [@fp12gaming](https://twitter.com/fp12gaming)
+
 Join the [Discord Server](https://discord.gg/KSRxBav) and discuss about this lib!
