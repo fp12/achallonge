@@ -1,12 +1,9 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  - 3.5
+  - 3.6
 install: 
-  - pip install -r requirements.txt
-  - pip install cchardet
-  - pip install aiodns
-  - pip install coveralls
+  - pip install -r requirements-ci.txt
 script:
   - coverage run --source=challonge tests.py -v
 after_success:
