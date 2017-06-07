@@ -60,7 +60,6 @@ class Tournament(metaclass=FieldHolder):
     def _find_participant(self, p_id):
         if self.participants is not None:
             for p in self.participants:
-                print(p.id, p.group_player_ids)
                 if int(p_id) == p.id or int(p_id) in p.group_player_ids:
                     return p
         return None
