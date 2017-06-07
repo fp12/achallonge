@@ -515,6 +515,28 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_n_multi_rounds(self):
+        random_name = get_random_name()
+        t = yield from self.user.create_tournament(random_name, random_name)
+
+        yield from t.add_participants(*('p{}'.format(i) for i in range(20)))
+        yield from t.start()
+
+        matches = yield from t.get_matches()
+        for m in matches:
+            if m.player1_id:
+                p1 = yield from t.get_participant(m.player1_id)
+                self.assertIsNotNone(p1)
+                self.assertIn(p1, t.participants)
+            if m.player2_id:
+                p2 = yield from t.get_participant(m.player2_id)
+                self.assertIsNotNone(p2)
+                self.assertIn(p1, t.participants)
+
+        yield from self.user.destroy_tournament(t)
+
 
 # @unittest.skip('')
 class MatchesTestCase(unittest.TestCase):

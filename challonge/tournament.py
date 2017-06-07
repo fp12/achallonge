@@ -50,13 +50,20 @@ class Tournament(metaclass=FieldHolder):
 
         self.participants = None
         self._create_participant = lambda p: self._create_holder(Participant, p, tournament=self)
-        self._find_participant = lambda p_id: self._find_holder(self.participants, p_id)
 
         self.matches = None
         self._create_match = lambda m: self._create_holder(Match, m, tournament=self)
         self._find_match = lambda m_id: self._find_holder(self.matches, m_id)
 
         self._refresh_from_json(json_def)
+
+    def _find_participant(self, p_id):
+        if self.participants is not None:
+            for p in self.participants:
+                print(p.id, p.group_player_ids)
+                if int(p_id) == p.id or int(p_id) in p.group_player_ids:
+                    return p
+        return None
 
     def _refresh_from_json(self, json_def):
         if 'tournament' in json_def:
