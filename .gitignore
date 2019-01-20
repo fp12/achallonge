@@ -3,6 +3,9 @@ htmlcov/
 build/
 dist/
 achallonge.egg-info/
+.vscode/
+.vs/
+.tox/
 *.pyc
 .secrets
 docs/_build
