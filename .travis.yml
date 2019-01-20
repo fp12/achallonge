@@ -2,7 +2,8 @@ language: python
 python:
   - 3.5
   - 3.6
-install: 
+  - 3.7
+install:
   - pip install -r requirements-ci.txt
 script:
   - coverage run --source=challonge tests.py -v
