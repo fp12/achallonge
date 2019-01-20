@@ -1,5 +1,7 @@
-import challonge
 import asyncio
+
+import challonge
+
 
 my_username = 'challonge_username'
 my_api_key = 'challonge_api_key'
