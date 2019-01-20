@@ -21,15 +21,25 @@ with open('challonge/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setup(name='achallonge',
-      author='Fabien Poupineau (fp12)',
-      url='https://github.com/fp12/achallonge',
       version=version,
-      packages=find_packages(),
-      license='MIT',
+
       description='A python library to use the Challonge API',
       long_description=readme,
-      include_package_data=True,
+      long_description_content_type="text/markdown",
+
+      license='MIT',
+
+      author='Fabien Poupineau (fp12)',
+      url='https://github.com/fp12/achallonge',
+
+      packages=find_packages(),
       install_requires=requirements,
+      extras_require={
+        'speed':  ['cchardet', 'aiodns']
+      }
+
+      include_package_data=True,
+
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
@@ -44,7 +54,4 @@ setup(name='achallonge',
         'Topic :: Utilities',
       ],
       keywords=['challonge',  'tournament', 'match'],
-      extras_require = {
-        'speed':  ['cchardet', 'aiodns']
-    }
-      )
+)
