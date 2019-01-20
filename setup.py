@@ -36,7 +36,7 @@ setup(name='achallonge',
       install_requires=requirements,
       extras_require={
         'speed':  ['cchardet', 'aiodns']
-      }
+      },
 
       include_package_data=True,
 
@@ -53,5 +53,5 @@ setup(name='achallonge',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Utilities',
       ],
-      keywords=['challonge',  'tournament', 'match'],
+      keywords=['challonge',  'tournament', 'match']
 )
