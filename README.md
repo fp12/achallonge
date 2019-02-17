@@ -36,7 +36,7 @@ If you want to have the optional dependencies for aiohttp, you can:
 ```python
 import challonge
 
-async def foo()
+async def foo():
     # Log in into Challonge with your CHALLONGE! API credentials (https://challonge.com/settings/developer).
     user = await challonge.get_user('your_challonge_username', 'your_api_key')
 
