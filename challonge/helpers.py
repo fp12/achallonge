@@ -89,8 +89,8 @@ class Connection:
             auth = aiohttp.BasicAuth(login=self.username, password=self.api_key)
             async with session.request(method, url, params=params, auth=auth) as response:
                 resp = await response.json()
-                assert_or_raise(response.status in [200, 401, 404, 406, 422, 500], ValueError, 'Unknown API return code', response.status, response.reason, uri, params)
-                assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, response.status, response.reason, uri, params)
+                assert_or_raise(response.status in [200, 401, 404, 406, 422, 500], ValueError, 'Unknown API return code', resp, response.status, response.reason, uri, params)
+                assert_or_raise(response.status not in [401, 404, 406, 422, 500], APIException, resp, response.status, response.reason, uri, params)
                 return resp
 
     @staticmethod
