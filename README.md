@@ -21,6 +21,7 @@ Optional:
 
 * `3.5`
 * `3.6`
+* `3.7`
 
 # Installation
 
@@ -61,7 +62,7 @@ The full documentation can be found on [Read the docs](http://achallonge.readthe
 
 Distributed under MIT license. See `LICENSE` for details
 
-Fabien Poupineau (fp12) - 2017
+Fabien Poupineau (fp12) - 2017-2019
 
 Twitter: [@fp12gaming](https://twitter.com/fp12gaming)
 
