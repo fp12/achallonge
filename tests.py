@@ -537,6 +537,26 @@ class ATournamentsTestCase(unittest.TestCase):
 
         yield from self.user.destroy_tournament(t)
 
+    # @unittest.skip('')
+    @async_test
+    def test_o_shuffle(self):
+        participants_count = 20
+        random_name = get_random_name()
+
+        t = yield from self.user.create_tournament(random_name, random_name)
+        yield from t.add_participants(*['p' + str(i) for i in range(participants_count)])
+
+        # we'll compare the seeds, and if more than half have changed, then we're good
+        initial_participants_seeds = [(p.name, p.seed) for p in t.participants]
+        yield from t.shuffle_participants()
+        mod_count = 0
+        for name, seed in initial_participants_seeds:
+            p = yield from t.search_participant(name)
+            self.assertIsNotNone(p, 'Could not find participant named \'{}\''.format(name))
+            if p.seed != seed:
+                mod_count += 1
+        self.assertGreaterEqual(mod_count, participants_count // 2)
+
 
 # @unittest.skip('')
 class MatchesTestCase(unittest.TestCase):
