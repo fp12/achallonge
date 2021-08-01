@@ -126,6 +126,30 @@ class Match(metaclass=FieldHolder):
         """
         res = await self.connection('POST', 'tournaments/{}/matches/{}/reopen'.format(self._tournament_id, self._id))
         self._refresh_from_json(res)
+        
+    async def mark_as_underway(self):
+        """ Marks the match as underway
+
+        |methcoro|
+
+        Raises:
+            APIException
+
+        """
+        res = await self.connection('POST', 'tournaments/{}/matches/{}/mark_as_underway'.format(self._tournament_id, self._id))
+        self._refresh_from_json(res)
+
+    async def unmark_as_underway(self):
+        """ Unmarks the match as underway
+
+        |methcoro|
+
+        Raises:
+            APIException
+
+        """
+        res = await self.connection('POST', 'tournaments/{}/matches/{}/unmark_as_underway'.format(self._tournament_id, self._id))
+        self._refresh_from_json(res)
 
     async def change_votes(self, player1_votes: int = None, player2_votes: int = None, add: bool = False):
         """ change the votes for either player
